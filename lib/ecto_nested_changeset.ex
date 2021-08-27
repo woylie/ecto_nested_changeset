@@ -8,17 +8,17 @@ defmodule EctoNestedChangeset do
   alias Ecto.Changeset
 
   @spec append_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
-          Ecto.t()
+          Changeset.t()
   def append_at(changeset, path, value),
     do: nested_update(changeset, path, value, :append)
 
   @spec prepend_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
-          Ecto.t()
+          Changeset.t()
   def prepend_at(changeset, path, value),
     do: nested_update(changeset, path, value, :prepend)
 
   @spec insert_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
-          Ecto.t()
+          Changeset.t()
   def insert_at(changeset, path, value),
     do: nested_update(changeset, path, value, :insert)
 
