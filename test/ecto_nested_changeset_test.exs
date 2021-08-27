@@ -29,6 +29,7 @@ defmodule EctoNestedChangesetTest do
 
     schema "posts" do
       field :title, :string
+      field :tags, {:array, :string}, default: []
       belongs_to :category, EctoNestedChangesetTest.Category
       has_many :comments, EctoNestedChangesetTest.Comment
     end
@@ -125,6 +126,24 @@ defmodule EctoNestedChangesetTest do
                ]
              } = changeset.changes
     end
+
+    test "appends item to an array field" do
+      changeset =
+        %Category{id: 1, posts: [%Post{id: 1, title: "first", tags: ["one"]}]}
+        |> change()
+        |> append_at([:posts, 0, :tags], "two")
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "first"},
+                   changes: %{tags: ["one", "two"]},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
   end
 
   describe "prepend_at/3" do
@@ -214,6 +233,24 @@ defmodule EctoNestedChangesetTest do
                      ]
                    },
                    data: %Post{}
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "prepends item to an array field" do
+      changeset =
+        %Category{id: 1, posts: [%Post{id: 1, title: "first", tags: ["one"]}]}
+        |> change()
+        |> prepend_at([:posts, 0, :tags], "two")
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "first"},
+                   changes: %{tags: ["two", "one"]},
+                   valid?: true
                  }
                ]
              } = changeset.changes
@@ -355,6 +392,24 @@ defmodule EctoNestedChangesetTest do
                ]
              } = changeset.changes
     end
+
+    test "inserts item into array field" do
+      changeset =
+        %Category{id: 1, posts: [%Post{title: "first", tags: ["one", "two"]}]}
+        |> change()
+        |> insert_at([:posts, 0, :tags, 1], "three")
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "first"},
+                   changes: %{tags: ["one", "three", "two"]},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
   end
 
   describe "delete_at/3" do
@@ -362,19 +417,20 @@ defmodule EctoNestedChangesetTest do
     test "deletes item at a root level field" do
       changeset =
         %Category{
+          id: 1,
           posts: [
             %Post{id: 1, title: "one"},
             %Post{id: 2, title: "two"},
-            %Post{id: 3, title: "three"}
+            %Post{title: "three"}
           ]
         }
         |> change()
-        |> delete_at([:posts, 1])
+        |> delete_at([:posts, 2])
 
       assert %{
                posts: [
                  %Ecto.Changeset{action: :update, data: %Post{id: 1}},
-                 %Ecto.Changeset{action: :update, data: %Post{id: 3}}
+                 %Ecto.Changeset{action: :update, data: %Post{id: 2}}
                ]
              } = changeset.changes
     end
