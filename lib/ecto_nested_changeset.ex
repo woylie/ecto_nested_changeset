@@ -104,8 +104,4 @@ defmodule EctoNestedChangeset do
       :error -> Map.get(changeset.data, field)
     end
   end
-
-  defp get_change_or_field(%{} = data, field) do
-    Map.get(data, field)
-  end
 end
