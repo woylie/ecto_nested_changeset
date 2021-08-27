@@ -37,7 +37,7 @@ defmodule EctoNestedChangesetTest do
   describe "append_at/3" do
     test "appends item at a root level field without data" do
       changeset =
-        %Category{posts: []}
+        %Category{id: 1, posts: []}
         |> change()
         |> append_at(:posts, %Post{title: "first"})
         |> append_at(:posts, %Post{title: "second"})
@@ -52,7 +52,7 @@ defmodule EctoNestedChangesetTest do
 
     test "appends item at a root level field with existing data" do
       changeset =
-        %Category{id: 1, posts: [%Post{title: "existing"}]}
+        %Category{id: 1, posts: [%Post{id: 1, title: "existing"}]}
         |> change()
         |> append_at(:posts, %Post{title: "first"})
         |> append_at(:posts, %Post{title: "second"})
@@ -103,6 +103,99 @@ defmodule EctoNestedChangesetTest do
                        },
                        %Ecto.Changeset{
                          action: :insert,
+                         data: %Comment{},
+                         valid?: true
+                       }
+                     ]
+                   },
+                   data: %Post{}
+                 },
+                 %Ecto.Changeset{
+                   action: :update,
+                   changes: %{
+                     comments: [
+                       %Ecto.Changeset{
+                         action: :insert,
+                         data: %Comment{}
+                       }
+                     ]
+                   },
+                   data: %Post{}
+                 }
+               ]
+             } = changeset.changes
+    end
+  end
+
+  describe "prepend_at/3" do
+    test "prepend item at a root level field without data" do
+      changeset =
+        %Category{id: 1, posts: []}
+        |> change()
+        |> prepend_at(:posts, %Post{title: "first"})
+        |> prepend_at(:posts, %Post{title: "second"})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{action: :insert, data: %Post{title: "second"}},
+                 %Ecto.Changeset{action: :insert, data: %Post{title: "first"}}
+               ]
+             } = changeset.changes
+    end
+
+    test "prepend item at a root level field with existing data" do
+      changeset =
+        %Category{id: 1, posts: [%Post{id: 1, title: "existing"}]}
+        |> change()
+        |> prepend_at(:posts, %Post{title: "first"})
+        |> prepend_at(:posts, %Post{title: "second"})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{action: :insert, data: %Post{title: "second"}},
+                 %Ecto.Changeset{action: :insert, data: %Post{title: "first"}},
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "existing"}
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "prepend item at a nested field" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{
+              id: 1,
+              title: "first",
+              comments: [%Comment{id: 1}]
+            },
+            %Post{
+              id: 2,
+              title: "second",
+              comments: []
+            }
+          ]
+        }
+        |> change()
+        |> prepend_at([:posts, 1, :comments], %Comment{})
+        |> prepend_at([:posts, 0, :comments], %Comment{})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   changes: %{
+                     comments: [
+                       %Ecto.Changeset{
+                         action: :insert,
+                         data: %Comment{},
+                         valid?: true
+                       },
+                       %Ecto.Changeset{
+                         action: :update,
                          data: %Comment{},
                          valid?: true
                        }

@@ -12,6 +12,11 @@ defmodule EctoNestedChangeset do
   def append_at(changeset, path, value),
     do: nested_update(changeset, path, value, :append)
 
+  @spec prepend_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
+          Ecto.t()
+  def prepend_at(changeset, path, value),
+    do: nested_update(changeset, path, value, :prepend)
+
   @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom) ::
           Changeset.t()
   def delete_at(changeset, path),
@@ -33,6 +38,22 @@ defmodule EctoNestedChangeset do
     data
     |> Changeset.change()
     |> Changeset.put_change(field, Map.fetch!(data, field) ++ [value])
+  end
+
+  defp nested_update(%Changeset{} = changeset, [field], value, :prepend)
+       when is_atom(field) do
+    Changeset.put_change(
+      changeset,
+      field,
+      [value | get_change_or_field(changeset, field)]
+    )
+  end
+
+  defp nested_update(%{} = data, [field], value, :prepend)
+       when is_atom(field) do
+    data
+    |> Changeset.change()
+    |> Changeset.put_change(field, [value | Map.fetch!(data, field)])
   end
 
   defp nested_update(items, [index], nil, :delete)
