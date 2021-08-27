@@ -220,6 +220,143 @@ defmodule EctoNestedChangesetTest do
     end
   end
 
+  describe "insert_at/3" do
+    test "inserts item at a root level field without data" do
+      changeset =
+        %Category{id: 1, posts: []}
+        |> change()
+        |> insert_at([:posts, 0], %Post{title: "first"})
+        |> insert_at([:posts, 0], %Post{title: "second"})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :insert,
+                   data: %Post{title: "second"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :insert,
+                   data: %Post{title: "first"},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "inserts item at a root level field with existing data" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{id: 1, title: "existing 1"},
+            %Post{id: 2, title: "existing 2"},
+            %Post{id: 3, title: "existing 3"}
+          ]
+        }
+        |> change()
+        |> insert_at([:posts, 2], %Post{title: "first"})
+        |> insert_at([:posts, 1], %Post{title: "second"})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "existing 1"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :insert,
+                   data: %Post{title: "second"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "existing 2"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :insert,
+                   data: %Post{title: "first"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "existing 3"},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "inserts item at a nested field" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{
+              id: 1,
+              title: "first",
+              comments: [%Comment{id: 1}, %Comment{id: 2}, %Comment{id: 3}]
+            },
+            %Post{
+              id: 2,
+              title: "second",
+              comments: [%Comment{id: 4}, %Comment{id: 5}]
+            }
+          ]
+        }
+        |> change()
+        |> insert_at([:posts, 0, :comments, 3], %Comment{})
+        |> insert_at([:posts, 1, :comments, 1], %Comment{})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   changes: %{
+                     comments: [
+                       %Ecto.Changeset{
+                         action: :update,
+                         data: %Comment{},
+                         valid?: true
+                       },
+                       %Ecto.Changeset{
+                         action: :update,
+                         data: %Comment{},
+                         valid?: true
+                       },
+                       %Ecto.Changeset{
+                         action: :update,
+                         data: %Comment{},
+                         valid?: true
+                       },
+                       %Ecto.Changeset{
+                         action: :insert,
+                         data: %Comment{},
+                         valid?: true
+                       }
+                     ]
+                   },
+                   data: %Post{},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :update,
+                   changes: %{
+                     comments: [
+                       %Ecto.Changeset{action: :update, data: %Comment{}},
+                       %Ecto.Changeset{action: :insert, data: %Comment{}},
+                       %Ecto.Changeset{action: :update, data: %Comment{}}
+                     ]
+                   },
+                   data: %Post{}
+                 }
+               ]
+             } = changeset.changes
+    end
+  end
+
   describe "delete_at/3" do
     @describetag :skip
     test "deletes item at a root level field" do
