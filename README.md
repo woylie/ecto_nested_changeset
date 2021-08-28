@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/woylie/ecto_nested_changeset/badge.svg?branch=main)](https://coveralls.io/github/woylie/ecto_nested_changeset?branch=main)
+
 # EctoNestedChangeset
 
 This is an experimental package for manipulating nested Ecto changesets.
