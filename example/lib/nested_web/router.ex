@@ -25,19 +25,5 @@ defmodule NestedWeb.Router do
 
     live "/owners/:id", OwnerLive.Show, :show
     live "/owners/:id/show/edit", OwnerLive.Show, :edit
-
-    live "/pets", PetLive.Index, :index
-    live "/pets/new", PetLive.Index, :new
-    live "/pets/:id/edit", PetLive.Index, :edit
-
-    live "/pets/:id", PetLive.Show, :show
-    live "/pets/:id/show/edit", PetLive.Show, :edit
-
-    live "/toys", ToyLive.Index, :index
-    live "/toys/new", ToyLive.Index, :new
-    live "/toys/:id/edit", ToyLive.Index, :edit
-
-    live "/toys/:id", ToyLive.Show, :show
-    live "/toys/:id/show/edit", ToyLive.Show, :edit
   end
 end

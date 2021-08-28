@@ -1,7 +1,7 @@
 <h1>Listing Owners</h1>
 
 <%= if @live_action in [:new, :edit] do %>
-  <%= live_modal @socket, NestedWeb.OwnerLive.FormComponent,
+  <%= live_modal NestedWeb.OwnerLive.FormComponent,
     id: @owner.id || :new,
     title: @page_title,
     action: @live_action,
