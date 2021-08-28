@@ -17,6 +17,8 @@ defmodule NestedWeb.OwnerLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"owner" => owner_params}, socket) do
+    owner_params = clean_params(owner_params)
+
     changeset =
       socket.assigns.owner
       |> Members.change_owner(owner_params)
@@ -39,7 +41,7 @@ defmodule NestedWeb.OwnerLive.FormComponent do
   end
 
   def handle_event("add-toy", %{"pet-index" => index}, socket) do
-    index = String.to_integer(index) |> IO.inspect()
+    index = String.to_integer(index)
 
     changeset =
       EctoNestedChangeset.append_at(
@@ -75,5 +77,17 @@ defmodule NestedWeb.OwnerLive.FormComponent do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
     end
+  end
+
+  # puts empty lists into association fields if no associations were added
+  defp clean_params(owner_params) do
+    owner_params
+    |> Map.put_new("pets", [])
+    |> Map.update!(
+      "pets",
+      &Enum.into(&1, %{}, fn {key, pet} ->
+        {key, Map.put_new(pet, "toys", [])}
+      end)
+    )
   end
 end
