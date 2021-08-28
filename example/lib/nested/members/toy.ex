@@ -1,10 +1,14 @@
 defmodule Nested.Members.Toy do
   use Ecto.Schema
+
   import Ecto.Changeset
+
+  alias Nested.Helpers
 
   schema "toys" do
     field :name, :string
     field :pet_id, :id
+    field :delete, :boolean, virtual: true, default: false
 
     timestamps()
   end
@@ -12,7 +16,8 @@ defmodule Nested.Members.Toy do
   @doc false
   def changeset(toy, attrs) do
     toy
-    |> cast(attrs, [:name])
+    |> cast(attrs, [:name, :delete])
     |> validate_required([:name])
+    |> Helpers.maybe_mark_for_deletion()
   end
 end

@@ -59,7 +59,8 @@ defmodule NestedWeb.OwnerLive.FormComponent do
     changeset =
       EctoNestedChangeset.delete_at(
         socket.assigns.changeset,
-        [:pets, index]
+        [:pets, index],
+        mode: {:flag, :delete}
       )
 
     {:noreply, assign(socket, :changeset, changeset)}
@@ -76,7 +77,8 @@ defmodule NestedWeb.OwnerLive.FormComponent do
     changeset =
       EctoNestedChangeset.delete_at(
         socket.assigns.changeset,
-        [:pets, pet_index, :toys, toy_index]
+        [:pets, pet_index, :toys, toy_index],
+        mode: {:flag, :delete}
       )
 
     {:noreply, assign(socket, :changeset, changeset)}

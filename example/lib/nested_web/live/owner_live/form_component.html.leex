@@ -15,49 +15,56 @@
     <div style="clear: both;">
       <%= for {fp, pet_index} <- f |> inputs_for(:pets) |> Enum.with_index() do %>
         <%= hidden_inputs_for(fp) %>
+        <%= hidden_input(fp, :delete) %>
 
-        <div class="label-wrapper">
-          <%= label fp, :name %>
-          <%= link "remove",
-            to: "#",
-            phx_click: "remove-pet",
-            phx_value_pet_index: pet_index,
-            phx_target: @myself
-          %>
-        </div>
-        <%= text_input fp, :name %>
-        <%= error_tag fp, :name %>
-
-        <fieldset>
-          <legend>Toys</legend>
-          <div style="clear: both;">
-            <%= for {ft, toy_index} <- fp |> inputs_for(:toys) |> Enum.with_index() do %>
-              <%= hidden_inputs_for(ft) %>
-
-              <div class="label-wrapper">
-                <%= label ft, :name %>
-                <%= link "remove",
-                  to: "#",
-                  phx_click: "remove-toy",
-                  phx_value_pet_index: pet_index,
-                  phx_value_toy_index: toy_index,
-                  phx_target: @myself
-                %>
-              </div>
-
-              <%= text_input ft, :name %>
-              <%= error_tag ft, :name %>
-            <% end %>
-
-            <%= link "add toy",
+        <%= unless fp |> input_value(:delete) |> html_escape() == {:safe, "true"} do %>
+          <div class="label-wrapper">
+            <%= label fp, :name %>
+            <%= link "remove",
               to: "#",
-              class: "button",
-              phx_click: "add-toy",
+              phx_click: "remove-pet",
               phx_value_pet_index: pet_index,
               phx_target: @myself
             %>
           </div>
-        </fieldset>
+          <%= text_input fp, :name %>
+          <%= error_tag fp, :name %>
+
+          <fieldset>
+            <legend>Toys</legend>
+            <div style="clear: both;">
+              <%= for {ft, toy_index} <- fp |> inputs_for(:toys) |> Enum.with_index() do %>
+
+                <%= hidden_inputs_for(ft) %>
+                <%= hidden_input(ft, :delete) %>
+
+                <%= unless ft |> input_value(:delete) |> html_escape() == {:safe, "true"} do %>
+                  <div class="label-wrapper">
+                    <%= label ft, :name %>
+                    <%= link "remove",
+                      to: "#",
+                      phx_click: "remove-toy",
+                      phx_value_pet_index: pet_index,
+                      phx_value_toy_index: toy_index,
+                      phx_target: @myself
+                    %>
+                  </div>
+
+                  <%= text_input ft, :name %>
+                  <%= error_tag ft, :name %>
+                <% end %>
+              <% end %>
+
+              <%= link "add toy",
+                to: "#",
+                class: "button",
+                phx_click: "add-toy",
+                phx_value_pet_index: pet_index,
+                phx_target: @myself
+              %>
+            </div>
+          </fieldset>
+        <% end %>
       <% end %>
       <%= link "add pet",
         to: "#",
