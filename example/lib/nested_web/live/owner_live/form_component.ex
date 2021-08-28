@@ -53,6 +53,35 @@ defmodule NestedWeb.OwnerLive.FormComponent do
     {:noreply, assign(socket, :changeset, changeset)}
   end
 
+  def handle_event("remove-pet", %{"pet-index" => index}, socket) do
+    index = String.to_integer(index)
+
+    changeset =
+      EctoNestedChangeset.delete_at(
+        socket.assigns.changeset,
+        [:pets, index]
+      )
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  def handle_event(
+        "remove-toy",
+        %{"pet-index" => pet_index, "toy-index" => toy_index},
+        socket
+      ) do
+    pet_index = String.to_integer(pet_index)
+    toy_index = String.to_integer(toy_index)
+
+    changeset =
+      EctoNestedChangeset.delete_at(
+        socket.assigns.changeset,
+        [:pets, pet_index, :toys, toy_index]
+      )
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
   defp save_owner(socket, :edit, owner_params) do
     case Members.update_owner(socket.assigns.owner, owner_params) do
       {:ok, _owner} ->

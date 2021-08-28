@@ -2,9 +2,12 @@
 @import "./phoenix.css";
 
 fieldset {
-  margin-left: 4rem;
   background-color: rgba(0, 0, 0, 0.03);
   padding: 2rem;
+}
+
+fieldset fieldset {
+  margin-left: 4rem;
 }
 
 fieldset legend {
@@ -18,6 +21,15 @@ fieldset legend {
 
 input[type="text"] {
   background-color: white;
+}
+
+.label-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.label-wrapper label {
+  margin-right: 1rem;
 }
 
 /* LiveView specific classes for your customizations */

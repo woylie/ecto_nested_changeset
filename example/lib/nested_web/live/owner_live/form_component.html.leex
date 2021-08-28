@@ -16,17 +16,35 @@
       <%= for {fp, pet_index} <- f |> inputs_for(:pets) |> Enum.with_index() do %>
         <%= hidden_inputs_for(fp) %>
 
-        <%= label fp, :name %>
+        <div class="label-wrapper">
+          <%= label fp, :name %>
+          <%= link "remove",
+            to: "#",
+            phx_click: "remove-pet",
+            phx_value_pet_index: pet_index,
+            phx_target: @myself
+          %>
+        </div>
         <%= text_input fp, :name %>
         <%= error_tag fp, :name %>
 
         <fieldset>
           <legend>Toys</legend>
           <div style="clear: both;">
-            <%= for ft <- inputs_for(fp, :toys) do %>
+            <%= for {ft, toy_index} <- fp |> inputs_for(:toys) |> Enum.with_index() do %>
               <%= hidden_inputs_for(ft) %>
 
-              <%= label ft, :name %>
+              <div class="label-wrapper">
+                <%= label ft, :name %>
+                <%= link "remove",
+                  to: "#",
+                  phx_click: "remove-toy",
+                  phx_value_pet_index: pet_index,
+                  phx_value_toy_index: toy_index,
+                  phx_target: @myself
+                %>
+              </div>
+
               <%= text_input ft, :name %>
               <%= error_tag ft, :name %>
             <% end %>
