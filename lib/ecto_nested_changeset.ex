@@ -1,32 +1,98 @@
 defmodule EctoNestedChangeset do
   @moduledoc """
-  Documentation for `EctoNestedChangeset`.
+  This module defines function for manipulating nested changesets.
   """
 
   import Ecto.Changeset
 
   alias Ecto.Changeset
 
+  @doc """
+  Appends a value to the field referenced by the path.
+
+  The last path segment must be an atom referencing either a to-many relation
+  field or an array field.
+  """
   @spec append_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
   def append_at(changeset, path, value),
     do: nested_update(changeset, path, value, :append)
 
+  @doc """
+  Prepends a value to the field referenced by the path.
+
+  The last path segment must be an atom referencing either a to-many relation
+  field or an array field.
+  """
   @spec prepend_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
   def prepend_at(changeset, path, value),
     do: nested_update(changeset, path, value, :prepend)
 
+  @doc """
+  Inserts a value into a field at the given position.
+
+  The last path segment must be an integer for the position.
+  """
   @spec insert_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
   def insert_at(changeset, path, value),
     do: nested_update(changeset, path, value, :insert)
 
+  @doc """
+  Updates the value in the changeset at the given position with the given update
+  function.
+
+  The path may lead to any field, including arrays and relation fields. Unlike
+  `Ecto.Changeset.update_change/3`, the update function is always applied,
+  either to the change or to existing value. The values will not be unwrapped,
+  which means that the update function passed as the last parameter must
+  potentially handle either changesets or raw values, depending on the path.
+  """
   @spec update_at(Changeset.t(), [atom | non_neg_integer] | atom, fun) ::
           Changeset.t()
   def update_at(changeset, path, func) when is_function(func, 1),
     do: nested_update(changeset, path, func, :update)
 
+  @doc """
+  Deletes the item at the given path.
+
+  The last path segment is expected to be an integer index.
+
+  Items that are not persisted in the database yet will always be removed from
+  the list. For structs that are already persisted in the database, there are
+  three different modes.
+
+  - `[mode: :replace]` (default) - The item will be wrapped in a changeset with
+    the `:replace` action. This only works if an appropriate `:on_replace`
+    option is set for the relation in the schema.
+  - `[mode: :delete]` - The item will be wrapped in a changeset with the action
+    set to `:delete`.
+  - `[mode: {:flag, field}]` - Puts `true` as a change for the given field.
+
+  The flag option useful for explicitly marking items for deletion in form
+  parameters. In this case, you would configure a virtual field on the schema
+  and set the changeset action to `:delete` in the changeset function in case
+  the value is set to `true`.
+
+      schema "pets" do
+        field :name, :string
+        field :delete, :boolean, virtual: true, default: false
+      end
+
+      def changeset(pet, attrs) do
+        pet
+        |> cast(attrs, [:name, :delete])
+        |> validate_required([:name])
+        |> maybe_mark_for_deletion()
+      end
+
+      def maybe_mark_for_deletion(%Ecto.Changeset{} = changeset) do
+        if Ecto.Changeset.get_change(changeset, :delete),
+          do: Map.put(changeset, :action, :delete),
+          else: changeset
+      end
+  """
   @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
           Changeset.t()
   def delete_at(changeset, path, opts \\ []),
