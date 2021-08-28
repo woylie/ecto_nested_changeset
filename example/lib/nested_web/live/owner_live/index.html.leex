@@ -1,0 +1,35 @@
+<h1>Listing Owners</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, NestedWeb.OwnerLive.FormComponent,
+    id: @owner.id || :new,
+    title: @page_title,
+    action: @live_action,
+    owner: @owner,
+    return_to: Routes.owner_index_path(@socket, :index) %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="owners">
+    <%= for owner <- @owners do %>
+      <tr id="owner-<%= owner.id %>">
+        <td><%= owner.name %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: Routes.owner_show_path(@socket, :show, owner) %></span>
+          <span><%= live_patch "Edit", to: Routes.owner_index_path(@socket, :edit, owner) %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: owner.id, data: [confirm: "Are you sure?"] %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New Owner", to: Routes.owner_index_path(@socket, :new) %></span>

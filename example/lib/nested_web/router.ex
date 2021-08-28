@@ -18,10 +18,26 @@ defmodule NestedWeb.Router do
     pipe_through :browser
 
     live "/", PageLive, :index
-  end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", NestedWeb do
-  #   pipe_through :api
-  # end
+    live "/owners", OwnerLive.Index, :index
+    live "/owners/new", OwnerLive.Index, :new
+    live "/owners/:id/edit", OwnerLive.Index, :edit
+
+    live "/owners/:id", OwnerLive.Show, :show
+    live "/owners/:id/show/edit", OwnerLive.Show, :edit
+
+    live "/pets", PetLive.Index, :index
+    live "/pets/new", PetLive.Index, :new
+    live "/pets/:id/edit", PetLive.Index, :edit
+
+    live "/pets/:id", PetLive.Show, :show
+    live "/pets/:id/show/edit", PetLive.Show, :edit
+
+    live "/toys", ToyLive.Index, :index
+    live "/toys/new", ToyLive.Index, :new
+    live "/toys/:id/edit", ToyLive.Index, :edit
+
+    live "/toys/:id", ToyLive.Show, :show
+    live "/toys/:id/show/edit", ToyLive.Show, :edit
+  end
 end
