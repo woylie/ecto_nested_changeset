@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    strategy:
+      matrix:
+        otp: ["22.3", "23.3", "24.0"]
+        elixir: ["1.10.4", "1.11.4", "1.12.2"]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - name: Install Dependencies
+        run: |
+          mix local.rebar --force
+          mix local.hex --force
+          mix deps.get
+      - name: Run Formatter
+        run: mix format --check-formatted
+      - name: Run Linter
+        run: mix credo
+      - name: Run Hex Audit
+        run: mix hex.audit
+      - name: Generate docs
+        run: mix docs
+      - name: Run Tests
+        run: mix coveralls.github
