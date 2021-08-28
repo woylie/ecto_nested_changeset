@@ -4,7 +4,7 @@ defmodule Nested.Repo.Migrations.CreateToys do
   def change do
     create table(:toys) do
       add :name, :string
-      add :pet_id, references(:pets, on_delete: :nothing)
+      add :pet_id, references(:pets, on_delete: :delete_all)
 
       timestamps()
     end
