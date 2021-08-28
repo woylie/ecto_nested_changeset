@@ -10,5 +10,37 @@
   <%= text_input f, :name %>
   <%= error_tag f, :name %>
 
+  <fieldset>
+    <legend>Pets</legend>
+    <div style="clear: both;">
+      <%= for fp <- inputs_for(f, :pets) do %>
+        <%= hidden_inputs_for(fp) %>
+
+        <%= label fp, :name %>
+        <%= text_input fp, :name %>
+        <%= error_tag fp, :name %>
+
+        <fieldset>
+          <legend>Toys</legend>
+          <div style="clear: both;">
+            <%= for ft <- inputs_for(fp, :toys) do %>
+              <%= hidden_inputs_for(ft) %>
+
+              <%= label ft, :name %>
+              <%= text_input ft, :name %>
+              <%= error_tag ft, :name %>
+            <% end %>
+          </div>
+        </fieldset>
+      <% end %>
+      <%= link "add pet",
+        to: "#",
+        class: "button",
+        phx_click: "add-pet",
+        phx_target: @myself
+      %>
+    </div>
+  </fieldset>
+
   <%= submit "Save", phx_disable_with: "Saving..." %>
 </form>

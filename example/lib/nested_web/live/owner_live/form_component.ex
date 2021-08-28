@@ -2,6 +2,7 @@ defmodule NestedWeb.OwnerLive.FormComponent do
   use NestedWeb, :live_component
 
   alias Nested.Members
+  alias Nested.Members.Pet
 
   @impl true
   def update(%{owner: owner} = assigns, socket) do
@@ -25,6 +26,13 @@ defmodule NestedWeb.OwnerLive.FormComponent do
 
   def handle_event("save", %{"owner" => owner_params}, socket) do
     save_owner(socket, socket.assigns.action, owner_params)
+  end
+
+  def handle_event("add-pet", _, socket) do
+    changeset =
+      EctoNestedChangeset.append_at(socket.assigns.changeset, :pets, %Pet{})
+
+    {:noreply, assign(socket, :changeset, changeset)}
   end
 
   defp save_owner(socket, :edit, owner_params) do
