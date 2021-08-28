@@ -1,4 +1,4 @@
-[![CI](https://github.com/woylie/ecto_nested_changeset/actions/workflows/ci.yml/badge.svg)](https://github.com/woylie/ecto_nested_changeset/actions/workflows/ci.yml) [![Coverage Status](https://coveralls.io/repos/github/woylie/ecto_nested_changeset/badge.svg?branch=main)](https://coveralls.io/github/woylie/ecto_nested_changeset?branch=main)
+[![CI](https://github.com/woylie/ecto_nested_changeset/actions/workflows/ci.yml/badge.svg)](https://github.com/woylie/ecto_nested_changeset/actions/workflows/ci.yml) [![Hex](https://img.shields.io/hexpm/v/ecto_nested_changeset)](https://hex.pm/packages/ecto_nested_changeset) [![Coverage Status](https://coveralls.io/repos/github/woylie/ecto_nested_changeset/badge.svg?branch=main)](https://coveralls.io/github/woylie/ecto_nested_changeset?branch=main)
 
 # EctoNestedChangeset
 
