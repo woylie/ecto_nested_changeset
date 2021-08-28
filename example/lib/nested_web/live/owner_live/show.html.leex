@@ -24,7 +24,7 @@
   <%= for pet <- @owner.pets do %>
     <li>
       <strong>Name:</strong> <%= @owner.name %>,
-      <strong>Toys:</strong> <%= Enum.join(pet.toys, ", ") %>
+      <strong>Toys:</strong> <%= pet.toys |> Enum.map(& &1.name) |> Enum.join(", ") %>
     </li>
   <% end %>
 </ul>
