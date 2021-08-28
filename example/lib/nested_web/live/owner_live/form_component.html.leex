@@ -13,7 +13,7 @@
   <fieldset>
     <legend>Pets</legend>
     <div style="clear: both;">
-      <%= for fp <- inputs_for(f, :pets) do %>
+      <%= for {fp, pet_index} <- f |> inputs_for(:pets) |> Enum.with_index() do %>
         <%= hidden_inputs_for(fp) %>
 
         <%= label fp, :name %>
@@ -30,6 +30,14 @@
               <%= text_input ft, :name %>
               <%= error_tag ft, :name %>
             <% end %>
+
+            <%= link "add toy",
+              to: "#",
+              class: "button",
+              phx_click: "add-toy",
+              phx_value_pet_index: pet_index,
+              phx_target: @myself
+            %>
           </div>
         </fieldset>
       <% end %>
