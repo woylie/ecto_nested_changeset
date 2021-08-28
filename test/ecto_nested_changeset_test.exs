@@ -413,6 +413,115 @@ defmodule EctoNestedChangesetTest do
     end
   end
 
+  describe "update_at/3" do
+    test "updates a field" do
+      changeset =
+        %Category{id: 1, posts: [%Post{id: 1, title: "first"}]}
+        |> change()
+        |> update_at([:posts, 0, :title], &String.reverse/1)
+        |> append_at([:posts], %Post{title: "second"})
+        |> update_at([:posts, 1, :title], &String.duplicate(&1, 2))
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{},
+                   changes: %{title: "tsrif"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :insert,
+                   data: %Post{},
+                   changes: %{title: "secondsecond"},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "updates a list field" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [%Post{id: 1, title: "first"}, %Post{id: 2, title: "second"}]
+        }
+        |> change()
+        |> append_at([:posts], %Post{title: "third"})
+        |> update_at(
+          [:posts],
+          &Enum.map(&1, fn post_changeset ->
+            title = get_field(post_changeset, :title)
+            put_change(post_changeset, :title, String.reverse(title))
+          end)
+        )
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{id: 1},
+                   changes: %{title: "tsrif"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{id: 2},
+                   changes: %{title: "dnoces"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :insert,
+                   data: %Post{},
+                   changes: %{title: "driht"},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "updates item in array field" do
+      changeset =
+        %Category{id: 1, posts: [%Post{title: "first", tags: ["one", "two"]}]}
+        |> change()
+        |> append_at([:posts, 0, :tags], "three")
+        |> update_at([:posts, 0, :tags, 1], &String.reverse/1)
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "first"},
+                   changes: %{tags: ["one", "owt", "three"]},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "updates array field" do
+      changeset =
+        %Category{id: 1, posts: [%Post{title: "first", tags: ["one", "two"]}]}
+        |> change()
+        |> append_at([:posts, 0, :tags], "three")
+        |> update_at(
+          [:posts, 0, :tags],
+          &Enum.map(&1, fn tag -> String.reverse(tag) end)
+        )
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "first"},
+                   changes: %{tags: ["eno", "owt", "eerht"]},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
+  end
+
   describe "delete_at/3" do
     test "deletes item from changes that isn't persisted yet" do
       changeset =
