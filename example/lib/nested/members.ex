@@ -69,6 +69,7 @@ defmodule Nested.Members do
   """
   def update_owner(%Owner{} = owner, attrs) do
     owner
+    |> Repo.preload(pets: [:toys])
     |> Owner.changeset(attrs)
     |> Repo.update()
   end
