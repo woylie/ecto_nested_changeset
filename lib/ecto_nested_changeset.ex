@@ -141,11 +141,11 @@ defmodule EctoNestedChangeset do
   the list. For structs that are already persisted in the database, there are
   three different modes.
 
-  - `[mode: :replace]` (default) - The item will be wrapped in a changeset with
-    the `:replace` action. This only works if an appropriate `:on_replace`
-    option is set for the relation in the schema.
-  - `[mode: :delete]` - The item will be wrapped in a changeset with the action
-    set to `:delete`.
+  - `[mode: {:action, :replace}]` (default) - The item will be wrapped in a
+    changeset with the `:replace` action. This only works if an appropriate
+    `:on_replace` option is set for the relation in the schema.
+  - `[mode: {:action, :delete}]` - The item will be wrapped in a changeset with
+    the action set to `:delete`.
   - `[mode: {:flag, field}]` - Puts `true` as a change for the given field.
 
   The flag option useful for explicitly marking items for deletion in form
@@ -183,7 +183,7 @@ defmodule EctoNestedChangeset do
           %Changeset{action: :update, data: %Post{name: "George"}},
         ]
       }
-      iex> delete_at(changeset, [:pets, 1], mode: :delete)
+      iex> delete_at(changeset, [:pets, 1], mode: {:action, :delete})
       %Ecto.Changeset{
         changes: [
           %Changeset{action: :update, data: %Post{name: "George"}},
@@ -271,15 +271,15 @@ defmodule EctoNestedChangeset do
         List.delete_at(items, index)
 
       %{} = item ->
-        case opts[:mode] || :replace do
-          :delete ->
+        case opts[:mode] || {:action, :replace} do
+          {:action, :delete} ->
             List.replace_at(
               items,
               index,
               item |> change() |> Map.put(:action, :delete)
             )
 
-          :replace ->
+          {:action, :replace} ->
             List.delete_at(items, index)
 
           {:flag, field} ->

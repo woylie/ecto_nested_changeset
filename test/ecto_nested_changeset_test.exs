@@ -574,8 +574,8 @@ defmodule EctoNestedChangesetTest do
         }
         |> change()
         |> prepend_at([:posts], %Post{})
-        |> delete_at([:posts, 2], mode: :delete)
-        |> delete_at([:posts, 0], mode: :delete)
+        |> delete_at([:posts, 2], mode: {:action, :delete})
+        |> delete_at([:posts, 0], mode: {:action, :delete})
 
       assert %{
                posts: [
@@ -598,8 +598,8 @@ defmodule EctoNestedChangesetTest do
         }
         |> change()
         |> prepend_at([:posts], %Post{})
-        |> delete_at([:posts, 0], mode: :replace)
-        |> delete_at([:posts, 1], mode: :replace)
+        |> delete_at([:posts, 0], mode: {:action, :replace})
+        |> delete_at([:posts, 1], mode: {:action, :replace})
 
       assert %{
                posts: [
@@ -677,8 +677,8 @@ defmodule EctoNestedChangesetTest do
           ]
         }
         |> change()
-        |> delete_at([:posts, 1, :comments, 0], mode: :delete)
-        |> delete_at([:posts, 0, :comments, 1], mode: :delete)
+        |> delete_at([:posts, 1, :comments, 0], mode: {:action, :delete})
+        |> delete_at([:posts, 0, :comments, 1], mode: {:action, :delete})
 
       assert %{
                posts: [

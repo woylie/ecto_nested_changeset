@@ -11,7 +11,7 @@ Add `ecto_nested_changeset` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ecto_nested_changeset, "~> 0.1.0"}
+    {:ecto_nested_changeset, "~> 0.1.1"}
   ]
 end
 ```
@@ -39,7 +39,7 @@ category
 |> Ecto.Changeset.change()
 |> append_at(:posts, %Post{title: "Padawan", comments: []})
 |> prepend_at([:posts, 0, :comments], %Comment{body: "ecneitaP"})
-|> delete_at([:posts, 0, :comments, 1], mode: :delete)
+|> delete_at([:posts, 0, :comments, 1], mode: {:action, :delete})
 |> insert_at([:posts, 1], %Post{title: "have"})
 |> append_at([:posts, 2, :comments], %Comment{body: "my"})
 |> update_at([:posts, 0, :comments, 0, :body], &String.reverse/1)
