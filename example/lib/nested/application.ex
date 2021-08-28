@@ -9,8 +9,6 @@ defmodule Nested.Application do
     children = [
       # Start the Ecto repository
       Nested.Repo,
-      # Start the Telemetry supervisor
-      NestedWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Nested.PubSub},
       # Start the Endpoint (http/https)
