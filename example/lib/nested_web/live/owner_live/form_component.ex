@@ -31,9 +31,7 @@ defmodule NestedWeb.OwnerLive.FormComponent do
 
   def handle_event("add-pet", _, socket) do
     changeset =
-      EctoNestedChangeset.append_at(socket.assigns.changeset, :pets, %Pet{
-        toys: []
-      })
+      EctoNestedChangeset.append_at(socket.assigns.changeset, :pets, %{})
 
     {:noreply, assign(socket, :changeset, changeset)}
   end
@@ -45,7 +43,7 @@ defmodule NestedWeb.OwnerLive.FormComponent do
       EctoNestedChangeset.append_at(
         socket.assigns.changeset,
         [:pets, index, :toys],
-        %Toy{}
+        %{}
       )
 
     {:noreply, assign(socket, :changeset, changeset)}
