@@ -12,6 +12,19 @@ defmodule EctoNestedChangeset do
 
   The last path segment must be an atom referencing either a to-many relation
   field or an array field.
+
+  ## Example
+
+      iex> %Owner{pets: [%Pet{}, %Pet{toys: [%Toy{name: "stick"}]}]}
+      ...> |> Ecto.Changeset.change()
+      ...> |> append_at(changeset, [:pets, 1, :toys], %Toy{name: "ball"})
+      ...> |> Ecto.Changeset.apply_changes()
+      %Owner{
+        pets: [
+          %Pet{},
+          %Pet{toys: [%Toy{name: "stick"}, %Toy{name: "ball"}]}
+        ]
+      }
   """
   @spec append_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
@@ -23,6 +36,19 @@ defmodule EctoNestedChangeset do
 
   The last path segment must be an atom referencing either a to-many relation
   field or an array field.
+
+  ## Example
+
+      iex> %Owner{pets: [%Pet{}, %Pet{toys: [%Toy{name: "stick"}]}]}
+      ...> |> Ecto.Changeset.change()
+      ...> |> prepend_at(changeset, [:pets, 1, :toys], %Toy{name: "ball"})
+      ...> |> Ecto.Changeset.apply_changes()
+      %Owner{
+        pets: [
+          %Pet{},
+          %Pet{toys: [%Toy{name: "ball"}, %Toy{name: "stick"}]}
+        ]
+      }
   """
   @spec prepend_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
@@ -33,6 +59,30 @@ defmodule EctoNestedChangeset do
   Inserts a value into a field at the given position.
 
   The last path segment must be an integer for the position.
+
+  ## Example
+
+      iex> %Owner{
+      ...>   pets: [
+      ...>     %Pet{},
+      ...>     %Pet{toys: [%Toy{name: "stick"}, %Toy{name: "ball"}]}
+      ...>   ]
+      ...> }
+      ...> |> Ecto.Changeset.change()
+      ...> |> insert_at(changeset, [:pets, 1, :toys, 1], %Toy{name: "rope"})
+      ...> |> Ecto.Changeset.apply_changes()
+      %Owner{
+        pets: [
+          %Pet{},
+          %Pet{
+            toys: [
+              %Toy{name: "ball"},
+              %Toy{name: "rope"},
+              %Toy{name: "stick"}
+            ]
+          }
+        ]
+      }
   """
   @spec insert_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
@@ -48,9 +98,34 @@ defmodule EctoNestedChangeset do
   either to the change or to existing value. The values will not be unwrapped,
   which means that the update function passed as the last parameter must
   potentially handle either changesets or raw values, depending on the path.
+
+  ## Examples
+
+      iex> %Owner{pets: [%Pet{toys: [%Toy{name: "stick"}, %Toy{name: "ball"}]}]}
+      ...> |> Ecto.Changeset.change()
+      ...> |> update_at(
+      ...>      changeset,
+      ...>      [:pets, 1, :toys, 1, :name],
+      ...>      &String.upcase/1
+      ...>    )
+      ...> |> Ecto.Changeset.apply_changes()
+      %Owner{
+        pets: [
+          %Pet{},
+          %Pet{
+            toys: [
+              %Toy{name: "stick"},
+              %Toy{name: "BALL"}
+            ]
+          }
+        ]
+      }
   """
-  @spec update_at(Changeset.t(), [atom | non_neg_integer] | atom, fun) ::
-          Changeset.t()
+  @spec update_at(
+          Changeset.t(),
+          [atom | non_neg_integer] | atom,
+          (any -> any)
+        ) :: Changeset.t()
   def update_at(%Changeset{} = changeset, path, func) when is_function(func, 1),
     do: nested_update(:update, changeset, path, func)
 
@@ -92,6 +167,37 @@ defmodule EctoNestedChangeset do
           do: Map.put(changeset, :action, :delete),
           else: changeset
       end
+
+  ## Examples
+
+      iex> changeset = Ecto.Changeset.change(
+             %Owner{pets: [%Pet{name: "George"}, %Pet{name: "Patty"}]}
+      ...> )
+      iex> delete_at(changeset, [:pets, 1])
+      %Ecto.Changeset{
+        changes: [
+          %Changeset{action: :replace, data: %Post{name: "Patty"}},
+          %Changeset{action: :update, data: %Post{name: "George"}},
+        ]
+      }
+      iex> delete_at(changeset, [:pets, 1], mode: :delete)
+      %Ecto.Changeset{
+        changes: [
+          %Changeset{action: :update, data: %Post{name: "George"}},
+          %Changeset{action: :delete, data: %Post{name: "Patty"}},
+        ]
+      }
+      iex> delete_at(changeset, [:pets, 1], mode: {:field, :delete})
+      %Ecto.Changeset{
+        changes: [
+          %Changeset{action: :update, data: %Post{name: "George"}},
+          %Changeset{
+            action: :update,
+            changes: %{delete: true},
+            data: %Post{name: "Patty"}
+          },
+        ]
+      }
   """
   @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
           Changeset.t()
