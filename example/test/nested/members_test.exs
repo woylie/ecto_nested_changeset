@@ -16,7 +16,7 @@ defmodule Nested.MembersTest do
         |> Enum.into(@valid_attrs)
         |> Members.create_owner()
 
-      owner
+      Repo.preload(owner, pets: [:toys])
     end
 
     test "list_owners/0 returns all owners" do
@@ -40,13 +40,19 @@ defmodule Nested.MembersTest do
 
     test "update_owner/2 with valid data updates the owner" do
       owner = owner_fixture()
-      assert {:ok, %Owner{} = owner} = Members.update_owner(owner, @update_attrs)
+
+      assert {:ok, %Owner{} = owner} =
+               Members.update_owner(owner, @update_attrs)
+
       assert owner.name == "some updated name"
     end
 
     test "update_owner/2 with invalid data returns error changeset" do
       owner = owner_fixture()
-      assert {:error, %Ecto.Changeset{}} = Members.update_owner(owner, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Members.update_owner(owner, @invalid_attrs)
+
       assert owner == Members.get_owner!(owner.id)
     end
 
@@ -105,7 +111,10 @@ defmodule Nested.MembersTest do
 
     test "update_pet/2 with invalid data returns error changeset" do
       pet = pet_fixture()
-      assert {:error, %Ecto.Changeset{}} = Members.update_pet(pet, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Members.update_pet(pet, @invalid_attrs)
+
       assert pet == Members.get_pet!(pet.id)
     end
 
@@ -164,7 +173,10 @@ defmodule Nested.MembersTest do
 
     test "update_toy/2 with invalid data returns error changeset" do
       toy = toy_fixture()
-      assert {:error, %Ecto.Changeset{}} = Members.update_toy(toy, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Members.update_toy(toy, @invalid_attrs)
+
       assert toy == Members.get_toy!(toy.id)
     end
 

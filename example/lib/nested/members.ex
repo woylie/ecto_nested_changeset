@@ -18,7 +18,9 @@ defmodule Nested.Members do
 
   """
   def list_owners do
-    Repo.all(Owner)
+    Owner
+    |> preload(pets: [:toys])
+    |> Repo.all()
   end
 
   @doc """
@@ -35,7 +37,8 @@ defmodule Nested.Members do
       ** (Ecto.NoResultsError)
 
   """
-  def get_owner!(id), do: Repo.get!(Owner, id)
+  def get_owner!(id),
+    do: Owner |> where(id: ^id) |> preload(pets: [:toys]) |> Repo.one!()
 
   @doc """
   Creates a owner.
