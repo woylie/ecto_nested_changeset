@@ -610,7 +610,7 @@ defmodule EctoNestedChangesetTest do
              } = changeset.changes
     end
 
-    test "puts change on delete field from list with delete_flag option" do
+    test "puts change on delete field from list with flag option" do
       changeset =
         %Category{
           id: 1,
@@ -622,8 +622,8 @@ defmodule EctoNestedChangesetTest do
         }
         |> change()
         |> prepend_at([:posts], %Post{})
-        |> delete_at([:posts, 0], mode: {:delete_flag, :delete})
-        |> delete_at([:posts, 1], mode: {:delete_flag, :delete})
+        |> delete_at([:posts, 0], mode: {:flag, :delete})
+        |> delete_at([:posts, 1], mode: {:flag, :delete})
 
       assert %{
                posts: [

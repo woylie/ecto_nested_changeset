@@ -107,7 +107,7 @@ defmodule EctoNestedChangeset do
           :replace ->
             List.delete_at(items, index)
 
-          {:delete_flag, field} ->
+          {:flag, field} ->
             List.replace_at(
               items,
               index,
