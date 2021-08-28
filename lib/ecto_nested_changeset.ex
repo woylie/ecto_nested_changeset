@@ -98,9 +98,12 @@ defmodule EctoNestedChangeset do
 
   The path may lead to any field, including arrays and relation fields. Unlike
   `Ecto.Changeset.update_change/3`, the update function is always applied,
-  either to the change or to existing value. The values will not be unwrapped,
-  which means that the update function passed as the last parameter must
-  potentially handle either changesets or raw values, depending on the path.
+  either to the change or to existing value.
+
+  If the path points to a field with a simple type, the update function will
+  receive the raw value of the field. However, if the path points to the field
+  of a *-to-many relation, the list values will not be unwrapped, which means
+  that the update function has to handle a list of changesets.
 
   ## Examples
 
