@@ -53,6 +53,31 @@ defmodule EctoNestedChangesetTest do
              } = changeset.changes
     end
 
+    test "appends item at a sub field of a new list item" do
+      changeset =
+        %Category{id: 1, posts: []}
+        |> change()
+        |> append_at(:posts, %Post{title: "first"})
+        |> append_at([:posts, 0, :comments], %Comment{})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :insert,
+                   changes: %{
+                     comments: [
+                       %Ecto.Changeset{
+                         action: :insert,
+                         data: %Comment{}
+                       }
+                     ]
+                   },
+                   data: %Post{title: "first"}
+                 }
+               ]
+             } = changeset.changes
+    end
+
     test "appends item at a root level field with existing data" do
       changeset =
         %Category{id: 1, posts: [%Post{id: 1, title: "existing"}]}
@@ -160,6 +185,31 @@ defmodule EctoNestedChangesetTest do
                posts: [
                  %Ecto.Changeset{action: :insert, data: %Post{title: "second"}},
                  %Ecto.Changeset{action: :insert, data: %Post{title: "first"}}
+               ]
+             } = changeset.changes
+    end
+
+    test "prepends item at a sub field of a new list item" do
+      changeset =
+        %Category{id: 1, posts: []}
+        |> change()
+        |> prepend_at(:posts, %Post{title: "first"})
+        |> prepend_at([:posts, 0, :comments], %Comment{})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :insert,
+                   changes: %{
+                     comments: [
+                       %Ecto.Changeset{
+                         action: :insert,
+                         data: %Comment{}
+                       }
+                     ]
+                   },
+                   data: %Post{title: "first"}
+                 }
                ]
              } = changeset.changes
     end
@@ -278,6 +328,31 @@ defmodule EctoNestedChangesetTest do
                    action: :insert,
                    data: %Post{title: "first"},
                    valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "inserts item at a sub field of a new list item" do
+      changeset =
+        %Category{id: 1, posts: []}
+        |> change()
+        |> insert_at([:posts, 0], %Post{title: "first"})
+        |> insert_at([:posts, 0, :comments, 0], %Comment{})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :insert,
+                   changes: %{
+                     comments: [
+                       %Ecto.Changeset{
+                         action: :insert,
+                         data: %Comment{}
+                       }
+                     ]
+                   },
+                   data: %Post{title: "first"}
                  }
                ]
              } = changeset.changes

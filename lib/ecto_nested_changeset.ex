@@ -8,6 +8,7 @@ defmodule EctoNestedChangeset do
 
   import Ecto.Changeset
 
+  alias Ecto.Association.NotLoaded
   alias Ecto.Changeset
 
   @doc """
@@ -215,11 +216,13 @@ defmodule EctoNestedChangeset do
 
   defp nested_update(:append, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
-    Changeset.put_change(
-      changeset,
-      field,
-      get_change_or_field(changeset, field) ++ [value]
-    )
+    new_value =
+      case {get_change_or_field(changeset, field), changeset.action} do
+        {%NotLoaded{}, :insert} -> [value]
+        {previous_value, _} -> previous_value ++ [value]
+      end
+
+    Changeset.put_change(changeset, field, new_value)
   end
 
   defp nested_update(:append, %{} = data, [field], value) when is_atom(field) do
@@ -230,11 +233,13 @@ defmodule EctoNestedChangeset do
 
   defp nested_update(:prepend, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
-    Changeset.put_change(
-      changeset,
-      field,
-      [value | get_change_or_field(changeset, field)]
-    )
+    new_value =
+      case {get_change_or_field(changeset, field), changeset.action} do
+        {%NotLoaded{}, :insert} -> [value]
+        {previous_value, _} -> [value | previous_value]
+      end
+
+    Changeset.put_change(changeset, field, new_value)
   end
 
   defp nested_update(:prepend, %{} = data, [field], value)
@@ -247,6 +252,17 @@ defmodule EctoNestedChangeset do
   defp nested_update(:insert, items, [index], value)
        when is_list(items) and is_integer(index) do
     List.insert_at(items, index, value)
+  end
+
+  defp nested_update(:insert, %Changeset{} = changeset, [field, index], value)
+       when is_atom(field) and is_integer(index) do
+    new_value =
+      case {get_change_or_field(changeset, field), changeset.action} do
+        {%NotLoaded{}, :insert} -> [value]
+        {previous_value, _} -> List.insert_at(previous_value, index, value)
+      end
+
+    Changeset.put_change(changeset, field, new_value)
   end
 
   defp nested_update(:update, %Changeset{} = changeset, [field], func)

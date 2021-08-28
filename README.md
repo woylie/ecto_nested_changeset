@@ -11,7 +11,7 @@ Add `ecto_nested_changeset` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ecto_nested_changeset, "~> 0.1.1"}
+    {:ecto_nested_changeset, "~> 0.1.2"}
   ]
 end
 ```
