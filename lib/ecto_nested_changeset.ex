@@ -1,6 +1,9 @@
 defmodule EctoNestedChangeset do
   @moduledoc """
   This module defines function for manipulating nested changesets.
+
+  All functions take a path as the second argument. The path is a list of atoms
+  (for field names) and integers (for indexes in lists).
   """
 
   import Ecto.Changeset

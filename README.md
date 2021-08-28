@@ -14,6 +14,8 @@ def deps do
 end
 ```
 
+See the module documentation of `EctoNestedChangeset` for usage examples.
+
 ## Example application
 
 ```bash
@@ -22,4 +24,4 @@ mix setup
 mix phx.server
 ```
 
-Access the list of pet owners at `http://localhost:4000`.
+Access the list of pet owners at http://localhost:4000.
