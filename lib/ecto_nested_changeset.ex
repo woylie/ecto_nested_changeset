@@ -15,8 +15,8 @@ defmodule EctoNestedChangeset do
   """
   @spec append_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
-  def append_at(changeset, path, value),
-    do: nested_update(changeset, path, value, :append)
+  def append_at(%Changeset{} = changeset, path, value),
+    do: nested_update(:append, changeset, path, value)
 
   @doc """
   Prepends a value to the field referenced by the path.
@@ -26,8 +26,8 @@ defmodule EctoNestedChangeset do
   """
   @spec prepend_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
-  def prepend_at(changeset, path, value),
-    do: nested_update(changeset, path, value, :prepend)
+  def prepend_at(%Changeset{} = changeset, path, value),
+    do: nested_update(:prepend, changeset, path, value)
 
   @doc """
   Inserts a value into a field at the given position.
@@ -36,8 +36,8 @@ defmodule EctoNestedChangeset do
   """
   @spec insert_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
-  def insert_at(changeset, path, value),
-    do: nested_update(changeset, path, value, :insert)
+  def insert_at(%Changeset{} = changeset, path, value),
+    do: nested_update(:insert, changeset, path, value)
 
   @doc """
   Updates the value in the changeset at the given position with the given update
@@ -51,8 +51,8 @@ defmodule EctoNestedChangeset do
   """
   @spec update_at(Changeset.t(), [atom | non_neg_integer] | atom, fun) ::
           Changeset.t()
-  def update_at(changeset, path, func) when is_function(func, 1),
-    do: nested_update(changeset, path, func, :update)
+  def update_at(%Changeset{} = changeset, path, func) when is_function(func, 1),
+    do: nested_update(:update, changeset, path, func)
 
   @doc """
   Deletes the item at the given path.
@@ -95,13 +95,13 @@ defmodule EctoNestedChangeset do
   """
   @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
           Changeset.t()
-  def delete_at(changeset, path, opts \\ []),
-    do: nested_update(changeset, path, opts, :delete)
+  def delete_at(%Changeset{} = changeset, path, opts \\ []),
+    do: nested_update(:delete, changeset, path, opts)
 
-  defp nested_update(changeset, field, value, operation) when is_atom(field),
-    do: nested_update(changeset, [field], value, operation)
+  defp nested_update(operation, changeset, field, value) when is_atom(field),
+    do: nested_update(operation, changeset, [field], value)
 
-  defp nested_update(%Changeset{} = changeset, [field], value, :append)
+  defp nested_update(:append, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
     Changeset.put_change(
       changeset,
@@ -110,13 +110,13 @@ defmodule EctoNestedChangeset do
     )
   end
 
-  defp nested_update(%{} = data, [field], value, :append) when is_atom(field) do
+  defp nested_update(:append, %{} = data, [field], value) when is_atom(field) do
     data
     |> Changeset.change()
     |> Changeset.put_change(field, Map.fetch!(data, field) ++ [value])
   end
 
-  defp nested_update(%Changeset{} = changeset, [field], value, :prepend)
+  defp nested_update(:prepend, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
     Changeset.put_change(
       changeset,
@@ -125,45 +125,45 @@ defmodule EctoNestedChangeset do
     )
   end
 
-  defp nested_update(%{} = data, [field], value, :prepend)
+  defp nested_update(:prepend, %{} = data, [field], value)
        when is_atom(field) do
     data
     |> Changeset.change()
     |> Changeset.put_change(field, [value | Map.fetch!(data, field)])
   end
 
-  defp nested_update(items, [index], value, :insert)
+  defp nested_update(:insert, items, [index], value)
        when is_list(items) and is_integer(index) do
     List.insert_at(items, index, value)
   end
 
-  defp nested_update(%Changeset{} = changeset, [field], func, :update)
+  defp nested_update(:update, %Changeset{} = changeset, [field], func)
        when is_atom(field) do
     value = get_change_or_field(changeset, field)
     Changeset.put_change(changeset, field, func.(value))
   end
 
-  defp nested_update(%{} = data, [field], func, :update)
+  defp nested_update(:update, %{} = data, [field], func)
        when is_atom(field) do
     data
     |> Changeset.change()
     |> Changeset.put_change(field, func.(Map.fetch!(data, field)))
   end
 
-  defp nested_update(items, [index], func, :update)
+  defp nested_update(:update, items, [index], func)
        when is_list(items) and is_integer(index) do
     List.update_at(items, index, &func.(&1))
   end
 
-  defp nested_update(items, [index], opts, :delete)
+  defp nested_update(:delete, items, [index], opts)
        when is_list(items) and is_integer(index) do
     case Enum.at(items, index) do
       %Changeset{action: :insert} ->
         List.delete_at(items, index)
 
       %{} = item ->
-        case opts[:mode] || :put_action do
-          :put_action ->
+        case opts[:mode] || :replace do
+          :delete ->
             List.replace_at(
               items,
               index,
@@ -186,30 +186,30 @@ defmodule EctoNestedChangeset do
     end
   end
 
-  defp nested_update(%Changeset{} = changeset, [field | rest], value, operation)
+  defp nested_update(operation, %Changeset{} = changeset, [field | rest], value)
        when is_atom(field) do
     nested_value = get_change_or_field(changeset, field)
 
     Changeset.put_change(
       changeset,
       field,
-      nested_update(nested_value, rest, value, operation)
+      nested_update(operation, nested_value, rest, value)
     )
   end
 
-  defp nested_update(%{} = data, [field | rest], value, operation)
+  defp nested_update(operation, %{} = data, [field | rest], value)
        when is_atom(field) do
     nested_value = Map.get(data, field)
 
     data
     |> change()
-    |> put_change(field, nested_update(nested_value, rest, value, operation))
+    |> put_change(field, nested_update(operation, nested_value, rest, value))
   end
 
-  defp nested_update(items, [index | rest], value, operation)
+  defp nested_update(operation, items, [index | rest], value)
        when is_list(items) and is_integer(index) do
     List.update_at(items, index, fn changeset_or_value ->
-      nested_update(changeset_or_value, rest, value, operation)
+      nested_update(operation, changeset_or_value, rest, value)
     end)
   end
 

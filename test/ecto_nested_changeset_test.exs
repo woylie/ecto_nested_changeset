@@ -555,8 +555,8 @@ defmodule EctoNestedChangesetTest do
 
       assert %{
                posts: [
+                 %Changeset{action: :replace, data: %Post{id: 2}},
                  %Changeset{action: :update, data: %Post{id: 1}},
-                 %Changeset{action: :delete, data: %Post{id: 2}},
                  %Changeset{action: :update, data: %Post{id: 3}}
                ]
              } = changeset.changes
@@ -574,8 +574,8 @@ defmodule EctoNestedChangesetTest do
         }
         |> change()
         |> prepend_at([:posts], %Post{})
-        |> delete_at([:posts, 2], mode: :put_action)
-        |> delete_at([:posts, 0], mode: :put_action)
+        |> delete_at([:posts, 2], mode: :delete)
+        |> delete_at([:posts, 0], mode: :delete)
 
       assert %{
                posts: [
@@ -677,8 +677,8 @@ defmodule EctoNestedChangesetTest do
           ]
         }
         |> change()
-        |> delete_at([:posts, 1, :comments, 0])
-        |> delete_at([:posts, 0, :comments, 1])
+        |> delete_at([:posts, 1, :comments, 0], mode: :delete)
+        |> delete_at([:posts, 0, :comments, 1], mode: :delete)
 
       assert %{
                posts: [
