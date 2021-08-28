@@ -17,7 +17,7 @@ defmodule NestedWeb.Router do
   scope "/", NestedWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    live "/", OwnerLive.Index, :index
 
     live "/owners", OwnerLive.Index, :index
     live "/owners/new", OwnerLive.Index, :new
