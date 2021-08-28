@@ -18,5 +18,16 @@
 
 </ul>
 
+<h2>Pets</h2>
+
+<ul>
+  <%= for pet <- @owner.pets do %>
+    <li>
+      <strong>Name:</strong> <%= @owner.name %>,
+      <strong>Toys:</strong> <%= Enum.join(pet.toys, ", ") %>
+    </li>
+  <% end %>
+</ul>
+
 <span><%= live_patch "Edit", to: Routes.owner_show_path(@socket, :edit, @owner), class: "button" %></span>
 <span><%= live_redirect "Back", to: Routes.owner_index_path(@socket, :index) %></span>
