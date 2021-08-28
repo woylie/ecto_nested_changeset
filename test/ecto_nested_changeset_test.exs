@@ -13,7 +13,7 @@ defmodule EctoNestedChangesetTest do
     use Ecto.Schema
 
     schema "categories" do
-      has_many :posts, EctoNestedChangesetTest.Post
+      has_many :posts, EctoNestedChangesetTest.Post, on_replace: :delete
     end
   end
 
@@ -29,6 +29,7 @@ defmodule EctoNestedChangesetTest do
     use Ecto.Schema
 
     schema "posts" do
+      field :delete, :boolean, virtual: true, default: false
       field :title, :string
       field :tags, {:array, :string}, default: []
       belongs_to :category, EctoNestedChangesetTest.Category
@@ -557,6 +558,83 @@ defmodule EctoNestedChangesetTest do
                  %Changeset{action: :update, data: %Post{id: 1}},
                  %Changeset{action: :delete, data: %Post{id: 2}},
                  %Changeset{action: :update, data: %Post{id: 3}}
+               ]
+             } = changeset.changes
+    end
+
+    test "puts delete action for persisted data" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{id: 1, title: "one"},
+            %Post{id: 2, title: "two"},
+            %Post{id: 3, title: "three"}
+          ]
+        }
+        |> change()
+        |> prepend_at([:posts], %Post{})
+        |> delete_at([:posts, 2], mode: :put_action)
+        |> delete_at([:posts, 0], mode: :put_action)
+
+      assert %{
+               posts: [
+                 %Changeset{action: :update, data: %Post{id: 1}},
+                 %Changeset{action: :delete, data: %Post{id: 2}},
+                 %Changeset{action: :update, data: %Post{id: 3}}
+               ]
+             } = changeset.changes
+    end
+
+    test "removes persisted data from list with replace option" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{id: 1, title: "one"},
+            %Post{id: 2, title: "two"},
+            %Post{id: 3, title: "three"}
+          ]
+        }
+        |> change()
+        |> prepend_at([:posts], %Post{})
+        |> delete_at([:posts, 0], mode: :replace)
+        |> delete_at([:posts, 1], mode: :replace)
+
+      assert %{
+               posts: [
+                 %Changeset{action: :replace, data: %Post{id: 2}},
+                 %Changeset{action: :update, data: %Post{id: 1}},
+                 %Changeset{action: :update, data: %Post{id: 3}}
+               ]
+             } = changeset.changes
+    end
+
+    test "puts change on delete field from list with delete_flag option" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{id: 1, title: "one"},
+            %Post{id: 2, title: "two"},
+            %Post{id: 3, title: "three"}
+          ]
+        }
+        |> change()
+        |> prepend_at([:posts], %Post{})
+        |> delete_at([:posts, 0], mode: {:delete_flag, :delete})
+        |> delete_at([:posts, 1], mode: {:delete_flag, :delete})
+
+      assert %{
+               posts: [
+                 %Changeset{action: :update, data: %Post{id: 1}, valid?: true},
+                 %Changeset{
+                   action: :update,
+                   changes: %{delete: true},
+                   data: %Post{id: 2},
+                   valid?: true
+                 },
+                 %Changeset{action: :update, data: %Post{id: 3}, valid?: true}
                ]
              } = changeset.changes
     end

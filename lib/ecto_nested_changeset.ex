@@ -27,10 +27,10 @@ defmodule EctoNestedChangeset do
   def update_at(changeset, path, func) when is_function(func, 1),
     do: nested_update(changeset, path, func, :update)
 
-  @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom) ::
+  @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
           Changeset.t()
-  def delete_at(changeset, path),
-    do: nested_update(changeset, path, nil, :delete)
+  def delete_at(changeset, path, opts \\ []),
+    do: nested_update(changeset, path, opts, :delete)
 
   defp nested_update(changeset, field, value, operation) when is_atom(field),
     do: nested_update(changeset, [field], value, operation)
@@ -89,18 +89,31 @@ defmodule EctoNestedChangeset do
     List.update_at(items, index, &func.(&1))
   end
 
-  defp nested_update(items, [index], nil, :delete)
+  defp nested_update(items, [index], opts, :delete)
        when is_list(items) and is_integer(index) do
     case Enum.at(items, index) do
       %Changeset{action: :insert} ->
         List.delete_at(items, index)
 
       %{} = item ->
-        List.replace_at(
-          items,
-          index,
-          item |> change() |> Map.put(:action, :delete)
-        )
+        case opts[:mode] || :put_action do
+          :put_action ->
+            List.replace_at(
+              items,
+              index,
+              item |> change() |> Map.put(:action, :delete)
+            )
+
+          :replace ->
+            List.delete_at(items, index)
+
+          {:delete_flag, field} ->
+            List.replace_at(
+              items,
+              index,
+              item |> change() |> put_change(field, true)
+            )
+        end
 
       _item ->
         List.delete_at(items, index)
