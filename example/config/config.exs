@@ -13,8 +13,13 @@ config :nested,
 # Configures the endpoint
 config :nested, NestedWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "OhEawkMknnlFF0OVrN6MCznZxybsa8/8hX2iN6oHtwucEOJmSxdBWGpPrn8hB7iw",
-  render_errors: [view: NestedWeb.ErrorView, accepts: ~w(html json), layout: false],
+  secret_key_base:
+    "OhEawkMknnlFF0OVrN6MCznZxybsa8/8hX2iN6oHtwucEOJmSxdBWGpPrn8hB7iw",
+  render_errors: [
+    view: NestedWeb.ErrorView,
+    accepts: ~w(html json),
+    layout: false
+  ],
   pubsub_server: Nested.PubSub,
   live_view: [signing_salt: "YExwpGGo"]
 

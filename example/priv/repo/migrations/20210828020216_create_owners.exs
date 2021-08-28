@@ -7,6 +7,5 @@ defmodule Nested.Repo.Migrations.CreateOwners do
 
       timestamps()
     end
-
   end
 end

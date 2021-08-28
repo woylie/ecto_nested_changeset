@@ -9,6 +9,7 @@ defmodule NestedWeb.ErrorViewTest do
   end
 
   test "renders 500.html" do
-    assert render_to_string(NestedWeb.ErrorView, "500.html", []) == "Internal Server Error"
+    assert render_to_string(NestedWeb.ErrorView, "500.html", []) ==
+             "Internal Server Error"
   end
 end

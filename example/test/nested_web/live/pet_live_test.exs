@@ -76,7 +76,10 @@ defmodule NestedWeb.PetLiveTest do
     test "deletes pet in listing", %{conn: conn, pet: pet} do
       {:ok, index_live, _html} = live(conn, Routes.pet_index_path(conn, :index))
 
-      assert index_live |> element("#pet-#{pet.id} a", "Delete") |> render_click()
+      assert index_live
+             |> element("#pet-#{pet.id} a", "Delete")
+             |> render_click()
+
       refute has_element?(index_live, "#pet-#{pet.id}")
     end
   end
@@ -85,14 +88,16 @@ defmodule NestedWeb.PetLiveTest do
     setup [:create_pet]
 
     test "displays pet", %{conn: conn, pet: pet} do
-      {:ok, _show_live, html} = live(conn, Routes.pet_show_path(conn, :show, pet))
+      {:ok, _show_live, html} =
+        live(conn, Routes.pet_show_path(conn, :show, pet))
 
       assert html =~ "Show Pet"
       assert html =~ pet.name
     end
 
     test "updates pet within modal", %{conn: conn, pet: pet} do
-      {:ok, show_live, _html} = live(conn, Routes.pet_show_path(conn, :show, pet))
+      {:ok, show_live, _html} =
+        live(conn, Routes.pet_show_path(conn, :show, pet))
 
       assert show_live |> element("a", "Edit") |> render_click() =~
                "Edit Pet"

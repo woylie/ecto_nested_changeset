@@ -76,7 +76,10 @@ defmodule NestedWeb.ToyLiveTest do
     test "deletes toy in listing", %{conn: conn, toy: toy} do
       {:ok, index_live, _html} = live(conn, Routes.toy_index_path(conn, :index))
 
-      assert index_live |> element("#toy-#{toy.id} a", "Delete") |> render_click()
+      assert index_live
+             |> element("#toy-#{toy.id} a", "Delete")
+             |> render_click()
+
       refute has_element?(index_live, "#toy-#{toy.id}")
     end
   end
@@ -85,14 +88,16 @@ defmodule NestedWeb.ToyLiveTest do
     setup [:create_toy]
 
     test "displays toy", %{conn: conn, toy: toy} do
-      {:ok, _show_live, html} = live(conn, Routes.toy_show_path(conn, :show, toy))
+      {:ok, _show_live, html} =
+        live(conn, Routes.toy_show_path(conn, :show, toy))
 
       assert html =~ "Show Toy"
       assert html =~ toy.name
     end
 
     test "updates toy within modal", %{conn: conn, toy: toy} do
-      {:ok, show_live, _html} = live(conn, Routes.toy_show_path(conn, :show, toy))
+      {:ok, show_live, _html} =
+        live(conn, Routes.toy_show_path(conn, :show, toy))
 
       assert show_live |> element("a", "Edit") |> render_click() =~
                "Edit Toy"
