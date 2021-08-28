@@ -17,7 +17,7 @@ defmodule NestedWeb.OwnerLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"owner" => owner_params}, socket) do
-    owner_params = clean_params(owner_params)
+    owner_params = prepare_params(owner_params)
 
     changeset =
       socket.assigns.owner
@@ -111,7 +111,7 @@ defmodule NestedWeb.OwnerLive.FormComponent do
   end
 
   # puts empty lists into association fields if no associations were added
-  defp clean_params(owner_params) do
+  defp prepare_params(owner_params) do
     owner_params
     |> Map.put_new("pets", [])
     |> Map.update!(
@@ -120,5 +120,9 @@ defmodule NestedWeb.OwnerLive.FormComponent do
         {key, Map.put_new(pet, "toys", [])}
       end)
     )
+  end
+
+  defp deleted?(form) do
+    input_value(form, :delete) in ["true", true]
   end
 end
