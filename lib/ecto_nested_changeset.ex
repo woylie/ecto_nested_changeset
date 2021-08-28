@@ -68,7 +68,20 @@ defmodule EctoNestedChangeset do
 
   defp nested_update(items, [index], nil, :delete)
        when is_list(items) and is_integer(index) do
-    List.delete_at(items, index)
+    case Enum.at(items, index) do
+      %Changeset{action: :insert} ->
+        List.delete_at(items, index)
+
+      %{} = item ->
+        List.replace_at(
+          items,
+          index,
+          item |> change() |> Map.put(:action, :delete)
+        )
+
+      _item ->
+        List.delete_at(items, index)
+    end
   end
 
   defp nested_update(%Changeset{} = changeset, [field | rest], value, operation)

@@ -7,6 +7,7 @@ defmodule EctoNestedChangesetTest do
   alias __MODULE__.Category
   alias __MODULE__.Comment
   alias __MODULE__.Post
+  alias Ecto.Changeset
 
   defmodule Category do
     use Ecto.Schema
@@ -413,29 +414,65 @@ defmodule EctoNestedChangesetTest do
   end
 
   describe "delete_at/3" do
-    @describetag :skip
-    test "deletes item at a root level field" do
+    test "deletes item from changes that isn't persisted yet" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{id: 1, title: "one"},
+            %Post{id: 2, title: "two"}
+          ]
+        }
+        |> change()
+        |> append_at([:posts], %Post{title: "three"})
+        |> delete_at([:posts, 2])
+
+      assert changeset.changes == %{}
+    end
+
+    test "deletes existing item" do
       changeset =
         %Category{
           id: 1,
           posts: [
             %Post{id: 1, title: "one"},
             %Post{id: 2, title: "two"},
-            %Post{title: "three"}
+            %Post{id: 3, title: "three"}
           ]
         }
         |> change()
-        |> delete_at([:posts, 2])
+        |> delete_at([:posts, 1])
 
       assert %{
                posts: [
-                 %Ecto.Changeset{action: :update, data: %Post{id: 1}},
-                 %Ecto.Changeset{action: :update, data: %Post{id: 2}}
+                 %Changeset{action: :update, data: %Post{id: 1}},
+                 %Changeset{action: :delete, data: %Post{id: 2}},
+                 %Changeset{action: :update, data: %Post{id: 3}}
                ]
              } = changeset.changes
     end
 
-    test "deletes item from a nested field" do
+    test "deletes item from changes in nested field" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{id: 1, title: "one"},
+            %Post{
+              id: 2,
+              title: "two",
+              comments: [%Comment{id: 1}, %Comment{id: 2}]
+            }
+          ]
+        }
+        |> change()
+        |> append_at([:posts, 1, :comments], %Comment{})
+        |> delete_at([:posts, 1, :comments, 2])
+
+      assert changeset.changes == %{}
+    end
+
+    test "deletes existing item from a nested field" do
       changeset =
         %Category{
           id: 1,
@@ -468,6 +505,11 @@ defmodule EctoNestedChangesetTest do
                          valid?: true
                        },
                        %Ecto.Changeset{
+                         action: :delete,
+                         data: %Comment{id: 2},
+                         valid?: true
+                       },
+                       %Ecto.Changeset{
                          action: :update,
                          data: %Comment{id: 3},
                          valid?: true
@@ -481,12 +523,37 @@ defmodule EctoNestedChangesetTest do
                    changes: %{
                      comments: [
                        %Ecto.Changeset{
+                         action: :delete,
+                         data: %Comment{id: 4}
+                       },
+                       %Ecto.Changeset{
                          action: :update,
                          data: %Comment{id: 5}
                        }
                      ]
                    },
                    data: %Post{}
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    test "deletes item from an array field" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [%Post{title: "first", tags: ["one", "two", "three"]}]
+        }
+        |> change()
+        |> delete_at([:posts, 0, :tags, 1])
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Post{title: "first"},
+                   changes: %{tags: ["one", "three"]},
+                   valid?: true
                  }
                ]
              } = changeset.changes
