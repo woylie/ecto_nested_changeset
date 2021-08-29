@@ -2,7 +2,8 @@
 
 # EctoNestedChangeset
 
-This is an experimental package for manipulating nested Ecto changesets.
+This is an experimental package for manipulating nested
+[Ecto](https://github.com/elixir-ecto/ecto) changesets.
 
 ## Installation
 
@@ -16,9 +17,12 @@ def deps do
 end
 ```
 
-See the module documentation of `EctoNestedChangeset` for usage examples.
-
 ## Usage
+
+The primary use case of this library is the manipulation of
+[Ecto](https://github.com/elixir-ecto/ecto) changesets
+used as a source for dynamic, nested forms in
+[Phoenix LiveView](https://github.com/phoenixframework/phoenix_live_view).
 
 ```elixir
 category = %Category{
@@ -72,12 +76,15 @@ There is an example Phoenix application with a dynamic nested LiveView form in
 the `/example` folder of the repository.
 
 ```bash
-cd example
+git clone https://github.com/woylie/ecto_nested_changeset.git
+cd ecto_nested_changeset/example
 mix setup
 mix phx.server
 ```
 
-You can access the list of pet owners at http://localhost:4000.
+Note that Postgres needs to be running to use the application.
+
+You can access the application at http://localhost:4000.
 
 ## Status
 
