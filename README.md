@@ -83,4 +83,6 @@ You can access the list of pet owners at http://localhost:4000.
 
 This library has a very narrow purpose, which means that even though it is
 young, it is unlikely that new functionality is going to be added or that the
-API is going to change. Any issues that may arise will be dealt with swiftly.
+API is going to change. Should you miss something, though, don't hesitate to
+open an issue. Any issues and problems that may arise will be dealt with
+swiftly.
