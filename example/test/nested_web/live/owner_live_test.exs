@@ -5,7 +5,10 @@ defmodule NestedWeb.OwnerLiveTest do
 
   alias Nested.Members
 
-  @create_attrs %{name: "some name"}
+  @create_attrs %{
+    name: "some name",
+    pets: [%{name: "George", toys: [%{name: "ball"}]}]
+  }
   @update_attrs %{name: "some updated name"}
   @invalid_attrs %{name: nil}
 
@@ -45,7 +48,7 @@ defmodule NestedWeb.OwnerLiveTest do
 
       {:ok, _, html} =
         index_live
-        |> form("#owner-form", owner: @create_attrs)
+        |> form("#owner-form", owner: %{name: "Lizzy"})
         |> render_submit()
         |> follow_redirect(conn, Routes.owner_index_path(conn, :index))
 
@@ -122,6 +125,89 @@ defmodule NestedWeb.OwnerLiveTest do
 
       assert html =~ "Owner updated successfully"
       assert html =~ "some updated name"
+    end
+  end
+
+  describe "New" do
+    test "adds and removes pet and toy inputs", %{conn: conn} do
+      {:ok, new_live, _html} = live(conn, Routes.owner_index_path(conn, :new))
+
+      assert new_live
+             |> element("a", "add pet")
+             |> render_click() =~ ~s(<input id="owner-form_pets_0_name")
+
+      assert new_live
+             |> element("a", "add pet")
+             |> render_click() =~ ~s(<input id="owner-form_pets_1_name")
+
+      assert new_live
+             |> element(~s(a[phx-value-pet-index="1"]"), "add toy")
+             |> render_click() =~
+               ~s(<input id="owner-form_pets_1_toys_0_name")
+
+      assert new_live
+             |> element(~s(a[phx-value-pet-index="1"]"), "add toy")
+             |> render_click() =~ ~s(<input id="owner-form_pets_1_toys_1_name")
+
+      assert new_live
+             |> element(~s(a[phx-value-pet-index="0"]), "add toy")
+             |> render_click() =~
+               ~s(<input id="owner-form_pets_0_toys_0_name")
+
+      assert html =
+               new_live
+               |> element(
+                 ~s(a[phx-click="remove-pet"][phx-value-pet-index="0"]),
+                 "remove"
+               )
+               |> render_click()
+
+      assert html =~ ~s(<input id=\"owner-form_pets_0_name\")
+      refute html =~ ~s(<input id=\"owner-form_pets_1_name\")
+      refute html =~ ~s(<input id=\"owner-form_pets_1_toys_0_name\")
+      refute html =~ ~s(<input id=\"owner-form_pets_1_toys_1_name\")
+      assert html =~ ~s(<input id=\"owner-form_pets_0_toys_1_name\")
+      assert html =~ ~s(<input id=\"owner-form_pets_0_toys_1_name\")
+
+      refute new_live
+             |> element(
+               ~s(a[phx-click="remove-toy"][phx-value-pet-index="0"][phx-value-toy-index="1"]),
+               "remove"
+             )
+             |> render_click() =~ ~s(<input id="owner-form_pets_0_toys_1_name")
+    end
+  end
+
+  describe "Edit" do
+    setup [:create_owner]
+
+    test "adds and removes pet and toy inputs", %{conn: conn, owner: owner} do
+      {:ok, edit_live, _html} =
+        live(conn, Routes.owner_show_path(conn, :edit, owner))
+
+      assert edit_live
+             |> element("a", "add pet")
+             |> render_click() =~ ~s(<input id="owner-form_pets_1_name")
+
+      assert edit_live
+             |> element(~s(a[phx-value-pet-index="1"]), "add toy")
+             |> render_click() =~
+               ~s(<input id=\"owner-form_pets_1_toys_0_name\")
+
+      edit_live
+      |> element(
+        ~s(a[phx-click="remove-pet"][phx-value-pet-index="0"]),
+        "remove"
+      )
+      |> render_click()
+
+      assert edit_live
+             |> element(~s(input[id="owner-form_pets_0_delete"][value=["true"]))
+             |> has_element?()
+
+      refute edit_live
+             |> element(~s(<input[id="owner-form_pets_0_name"]))
+             |> has_element?()
     end
   end
 end

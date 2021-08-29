@@ -2,8 +2,6 @@ defmodule NestedWeb.OwnerLive.FormComponent do
   use NestedWeb, :live_component
 
   alias Nested.Members
-  alias Nested.Members.Pet
-  alias Nested.Members.Toy
 
   @impl true
   def update(%{owner: owner} = assigns, socket) do
