@@ -208,8 +208,10 @@ defmodule EctoNestedChangeset do
   """
   @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
           Changeset.t()
-  def delete_at(%Changeset{} = changeset, path, opts \\ []),
-    do: nested_update(:delete, changeset, path, opts)
+  def delete_at(%Changeset{} = changeset, path, opts \\ []) do
+    mode = opts[:mode] || {:action, :replace}
+    nested_update(:delete, changeset, path, mode)
+  end
 
   defp nested_update(operation, changeset, field, value) when is_atom(field),
     do: nested_update(operation, changeset, [field], value)
@@ -283,31 +285,28 @@ defmodule EctoNestedChangeset do
     List.update_at(items, index, &func.(&1))
   end
 
-  defp nested_update(:delete, items, [index], opts)
+  defp nested_update(:delete, items, [index], mode)
        when is_list(items) and is_integer(index) do
-    case Enum.at(items, index) do
-      %Changeset{action: :insert} ->
+    case {Enum.at(items, index), mode} do
+      {%Changeset{action: :insert}, _} ->
         List.delete_at(items, index)
 
-      %{} = item ->
-        case opts[:mode] || {:action, :replace} do
-          {:action, :delete} ->
-            List.replace_at(
-              items,
-              index,
-              item |> change() |> Map.put(:action, :delete)
-            )
+      {%{} = item, {:action, :delete}} ->
+        List.replace_at(
+          items,
+          index,
+          item |> change() |> Map.put(:action, :delete)
+        )
 
-          {:action, :replace} ->
-            List.delete_at(items, index)
+      {%{}, {:action, :replace}} ->
+        List.delete_at(items, index)
 
-          {:flag, field} ->
-            List.replace_at(
-              items,
-              index,
-              item |> change() |> put_change(field, true)
-            )
-        end
+      {%{} = item, {:flag, field}} when is_atom(field) ->
+        List.replace_at(
+          items,
+          index,
+          item |> change() |> put_change(field, true)
+        )
 
       _item ->
         List.delete_at(items, index)
