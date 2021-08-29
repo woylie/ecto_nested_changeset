@@ -19,7 +19,7 @@
   </thead>
   <tbody id="owners">
     <%= for owner <- @owners do %>
-      <tr id="owner-<%= owner.id %>">
+      <tr id={"owner-#{owner.id}"}>
         <td><%= owner.name %></td>
 
         <td>
