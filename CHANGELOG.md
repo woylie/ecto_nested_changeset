@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## [0.1.3] - 2021-08-30
+
+### Changed
+
+- Raise `EctoNestedChangeset.NotLoadedError` in case the relation field of a
+  loaded resource is not preloaded.
+- Handle list operations on root level relation fields if the field is not
+  preloaded and the data is not persisted.
+
 ## [0.1.2] - 2021-08-29
 
 ### Fixed
