@@ -2,7 +2,7 @@
 
 # EctoNestedChangeset
 
-This is an experimental package for manipulating nested
+This is a package for manipulating nested
 [Ecto](https://github.com/elixir-ecto/ecto) changesets.
 
 ## Installation
