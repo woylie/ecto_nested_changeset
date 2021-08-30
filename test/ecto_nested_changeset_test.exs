@@ -53,6 +53,23 @@ defmodule EctoNestedChangesetTest do
              } = changeset.changes
     end
 
+    test "doesn't raise error if field of unpersisted resource is not loaded" do
+      %Category{id: 1}
+      |> change()
+      |> append_at(:posts, %Post{title: "first"})
+    end
+
+    test "raises error if field of persisted resource is not preloaded" do
+      assert_raise EctoNestedChangeset.NotLoadedError,
+                   "field `:posts` is not loaded",
+                   fn ->
+                     %Category{id: 1}
+                     |> Map.update!(:__meta__, &Map.put(&1, :state, :loaded))
+                     |> change()
+                     |> append_at(:posts, %Post{title: "first"})
+                   end
+    end
+
     test "appends item at a sub field of a new list item" do
       changeset =
         %Category{id: 1, posts: []}
@@ -187,6 +204,23 @@ defmodule EctoNestedChangesetTest do
                  %Ecto.Changeset{action: :insert, data: %Post{title: "first"}}
                ]
              } = changeset.changes
+    end
+
+    test "doesn't raise error if field of unpersisted resource is not loaded" do
+      %Category{id: 1}
+      |> change()
+      |> prepend_at(:posts, %Post{title: "first"})
+    end
+
+    test "raises error if field of persisted resource is not preloaded" do
+      assert_raise EctoNestedChangeset.NotLoadedError,
+                   "field `:posts` is not loaded",
+                   fn ->
+                     %Category{id: 1}
+                     |> Map.update!(:__meta__, &Map.put(&1, :state, :loaded))
+                     |> change()
+                     |> prepend_at(:posts, %Post{title: "first"})
+                   end
     end
 
     test "prepends item at a sub field of a new list item" do
@@ -331,6 +365,23 @@ defmodule EctoNestedChangesetTest do
                  }
                ]
              } = changeset.changes
+    end
+
+    test "doesn't raise error if field of unpersisted resource is not loaded" do
+      %Category{id: 1}
+      |> change()
+      |> insert_at([:posts, 0], %Post{title: "first"})
+    end
+
+    test "raises error if field of persisted resource is not preloaded" do
+      assert_raise EctoNestedChangeset.NotLoadedError,
+                   "field `:posts` is not loaded",
+                   fn ->
+                     %Category{id: 1}
+                     |> Map.update!(:__meta__, &Map.put(&1, :state, :loaded))
+                     |> change()
+                     |> insert_at([:posts, 0], %Post{title: "first"})
+                   end
     end
 
     test "inserts item at a sub field of a new list item" do

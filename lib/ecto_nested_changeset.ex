@@ -219,9 +219,14 @@ defmodule EctoNestedChangeset do
   defp nested_update(:append, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
     new_value =
-      case {get_change_or_field(changeset, field), changeset.action} do
-        {%NotLoaded{}, :insert} -> [value]
-        {previous_value, _} -> previous_value ++ [value]
+      case get_change_or_field(changeset, field) do
+        %NotLoaded{} ->
+          if Ecto.get_meta(changeset.data, :state) == :built,
+            do: [value],
+            else: raise(EctoNestedChangeset.NotLoadedError, field: field)
+
+        previous_value ->
+          previous_value ++ [value]
       end
 
     Changeset.put_change(changeset, field, new_value)
@@ -236,9 +241,14 @@ defmodule EctoNestedChangeset do
   defp nested_update(:prepend, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
     new_value =
-      case {get_change_or_field(changeset, field), changeset.action} do
-        {%NotLoaded{}, :insert} -> [value]
-        {previous_value, _} -> [value | previous_value]
+      case get_change_or_field(changeset, field) do
+        %NotLoaded{} ->
+          if Ecto.get_meta(changeset.data, :state) == :built,
+            do: [value],
+            else: raise(EctoNestedChangeset.NotLoadedError, field: field)
+
+        previous_value ->
+          [value | previous_value]
       end
 
     Changeset.put_change(changeset, field, new_value)
@@ -259,9 +269,14 @@ defmodule EctoNestedChangeset do
   defp nested_update(:insert, %Changeset{} = changeset, [field, index], value)
        when is_atom(field) and is_integer(index) do
     new_value =
-      case {get_change_or_field(changeset, field), changeset.action} do
-        {%NotLoaded{}, :insert} -> [value]
-        {previous_value, _} -> List.insert_at(previous_value, index, value)
+      case get_change_or_field(changeset, field) do
+        %NotLoaded{} ->
+          if Ecto.get_meta(changeset.data, :state) == :built,
+            do: [value],
+            else: raise(EctoNestedChangeset.NotLoadedError, field: field)
+
+        previous_value ->
+          List.insert_at(previous_value, index, value)
       end
 
     Changeset.put_change(changeset, field, new_value)
