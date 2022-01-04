@@ -213,6 +213,24 @@ defmodule EctoNestedChangeset do
     nested_update(:delete, changeset, path, mode)
   end
 
+  @doc """
+  Returns a value from a changeset referenced by the path.
+
+  The last path segment must be an atom referencing either a to-many relation
+  field or an array field.
+
+  ## Example
+
+      iex> %Owner{pets: [%Pet{}, %Pet{toys: [%Toy{name: "stick"}]}]}
+      ...> |> Ecto.Changeset.change()
+      ...> |> get_at(changeset, [:pets, 1, :toys])
+      [%Toy{name: "stick"}, %Toy{name: "ball"}]
+  """
+  @spec get_at(Changeset.t(), [atom | non_neg_integer] | atom) :: any()
+  def get_at(%Changeset{} = changeset, path) do
+    nested_get(:get, changeset, path)
+  end
+
   defp nested_update(operation, changeset, field, value) when is_atom(field),
     do: nested_update(operation, changeset, [field], value)
 
@@ -353,6 +371,34 @@ defmodule EctoNestedChangeset do
     List.update_at(items, index, fn changeset_or_value ->
       nested_update(operation, changeset_or_value, rest, value)
     end)
+  end
+
+  defp nested_get(:get, %Changeset{} = changeset, [field])
+       when is_atom(field) do
+    Changeset.get_field(changeset, field)
+  end
+
+  defp nested_get(:get, %{} = data, [field])
+       when is_atom(field) do
+    Map.get(data, field)
+  end
+
+  defp nested_get(operation, %Changeset{} = changeset, [field | rest])
+       when is_atom(field) do
+    nested_value = get_change_or_field(changeset, field)
+    nested_get(operation, nested_value, rest)
+  end
+
+  defp nested_get(operation, %{} = data, [field | rest])
+       when is_atom(field) do
+    nested_value = Map.get(data, field)
+    nested_get(operation, nested_value, rest)
+  end
+
+  defp nested_get(operation, items, [index | rest])
+       when is_list(items) and is_integer(index) do
+    nested_value = Enum.at(items, index)
+    nested_get(operation, nested_value, rest)
   end
 
   defp get_change_or_field(%Changeset{} = changeset, field) do
