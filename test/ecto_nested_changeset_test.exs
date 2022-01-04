@@ -872,4 +872,36 @@ defmodule EctoNestedChangesetTest do
              } = changeset.changes
     end
   end
+
+  describe "get_at/2" do
+    test "gets a field of a nested item" do
+      field =
+        %Category{id: 1, posts: [%Post{id: 1, title: "first"}]}
+        |> change()
+        |> get_at([:posts, 0, :title])
+
+      assert field == "first"
+    end
+
+    test "gets a list of nested items" do
+      field =
+        %Category{
+          id: 1,
+          posts: [%Post{id: 1, title: "first"}, %Post{id: 2, title: "second"}]
+        }
+        |> change()
+        |> get_at([:posts])
+
+      assert field == [
+               %Post{id: 1, title: "first"},
+               %Post{id: 2, title: "second"}
+             ]
+    end
+
+    test "doesn't raise error if resource field is not loaded" do
+      %Category{id: 1}
+      |> change()
+      |> get_at([:posts])
+    end
+  end
 end
