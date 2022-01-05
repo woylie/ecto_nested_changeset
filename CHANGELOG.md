@@ -5,6 +5,7 @@
 ## [0.2.0] - 2022-01-06
 
 - Add `get_at/3` to retrieve the current field value of a nested changeset.
+- Update example application with Phoenix 1.6.6.
 
 ## [0.1.3] - 2021-08-30
 

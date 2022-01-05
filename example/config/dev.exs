@@ -1,11 +1,11 @@
-use Mix.Config
+import Config
 
 # Configure your database
 config :nested, Nested.Repo,
   username: "postgres",
   password: "postgres",
-  database: "nested_dev",
   hostname: "localhost",
+  database: "nested_dev",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
@@ -14,18 +14,18 @@ config :nested, Nested.Repo,
 #
 # The watchers configuration can be used to run external
 # watchers to your application. For example, we use it
-# with webpack to recompile .js and .css sources.
+# with esbuild to bundle .js and .css sources.
 config :nested, NestedWeb.Endpoint,
-  http: [port: 4000],
-  debug_errors: true,
-  code_reloader: true,
+  # Binding to loopback ipv4 address prevents access from other machines.
+  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
+  http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
+  code_reloader: true,
+  debug_errors: true,
+  secret_key_base: "WRzyTDbsrvQfb4XNNdhEoWSiqcwI1jVlwyVxai82DSKElgglDoQhjdG3/4JR+4a+",
   watchers: [
-    npm: [
-      "run",
-      "watch",
-      cd: Path.expand("../assets", __DIR__)
-    ]
+    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 
 # ## SSL Support

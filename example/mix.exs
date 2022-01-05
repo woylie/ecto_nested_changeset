@@ -5,9 +5,9 @@ defmodule Nested.MixProject do
     [
       app: :nested,
       version: "0.1.0",
-      elixir: "~> 1.7",
+      elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix] ++ Mix.compilers(),
+      compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -33,17 +33,18 @@ defmodule Nested.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.6.0-rc.0", override: true},
-      {:phoenix_ecto, "~> 4.4"},
+      {:ecto_nested_changeset, path: ".."},
       {:ecto_sql, "~> 3.7"},
-      {:postgrex, ">= 0.0.0"},
-      {:phoenix_live_view, "~> 0.16"},
+      {:esbuild, "~> 0.3", runtime: Mix.env() == :dev},
       {:floki, ">= 0.30.0", only: :test},
+      {:jason, "~> 1.2"},
+      {:phoenix, "~> 1.6.6"},
+      {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"},
-      {:ecto_nested_changeset, path: ".."}
+      {:phoenix_live_view, "~> 0.17.5"},
+      {:plug_cowboy, "~> 2.5"},
+      {:postgrex, ">= 0.0.0"}
     ]
   end
 
@@ -55,10 +56,11 @@ defmodule Nested.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup", "cmd npm install --prefix assets"],
+      setup: ["deps.get", "ecto.setup"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      "assets.deploy": ["esbuild default --minify", "phx.digest"]
     ]
   end
 end
