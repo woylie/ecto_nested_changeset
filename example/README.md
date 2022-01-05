@@ -3,9 +3,10 @@
 This application demonstrates how to use Ecto Nested Changeset to build a
 dynamic nested form with LiveView.
 
-To start the application, make sure Postgres is running and run:
+To start the application, run:
 
 ```bash
+docker compose up -d
 mix setup
 mix phx.server
 ```
