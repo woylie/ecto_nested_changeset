@@ -898,6 +898,15 @@ defmodule EctoNestedChangesetTest do
              ]
     end
 
+    test "gets item in an array field" do
+      field =
+        %Category{id: 1, posts: [%Post{title: "first", tags: ["one", "two"]}]}
+        |> change()
+        |> get_at([:posts, 0, :tags, 1])
+
+      assert field == "two"
+    end
+
     test "doesn't raise error if resource field is not loaded" do
       %Category{id: 1}
       |> change()

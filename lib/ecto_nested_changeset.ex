@@ -216,9 +216,6 @@ defmodule EctoNestedChangeset do
   @doc """
   Returns a value from a changeset referenced by the path.
 
-  The last path segment must be an atom referencing either a to-many relation
-  field or an array field.
-
   ## Example
 
       iex> %Owner{pets: [%Pet{}, %Pet{toys: [%Toy{name: "stick"}]}]}
@@ -381,6 +378,11 @@ defmodule EctoNestedChangeset do
   defp nested_get(:get, %{} = data, [field])
        when is_atom(field) do
     Map.get(data, field)
+  end
+
+  defp nested_get(:get, items, [index])
+       when is_list(items) and is_integer(index) do
+    Enum.at(items, index)
   end
 
   defp nested_get(operation, %Changeset{} = changeset, [field | rest])
