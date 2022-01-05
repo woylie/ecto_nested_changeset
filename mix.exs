@@ -38,12 +38,12 @@ defmodule EctoNestedChangeset.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:credo, "~> 1.5.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.6.0", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1.0", only: [:dev], runtime: false},
       {:ecto, "~> 3.7"},
       {:ecto_sql, "~> 3.7", only: :test},
       {:ex_doc, "~> 0.25", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.14", only: :test},
+      {:excoveralls, "~> 0.14.4", only: :test},
       {:stream_data, "~> 0.5", only: [:dev, :test]}
     ]
   end
