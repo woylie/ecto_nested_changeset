@@ -1,12 +1,16 @@
 <h1>Show Owner</h1>
 
 <%= if @live_action in [:edit] do %>
-  <%= live_modal NestedWeb.OwnerLive.FormComponent,
-    id: @owner.id,
-    title: @page_title,
-    action: @live_action,
-    owner: @owner,
-    return_to: Routes.owner_show_path(@socket, :show, @owner) %>
+  <.modal return_to={Routes.owner_show_path(@socket, :show, @owner)}>
+    <.live_component
+      module={NestedWeb.OwnerLive.FormComponent}
+      id={@owner.id}
+      title={@page_title}
+      action={@live_action}
+      owner={@owner}
+      return_to={Routes.owner_show_path(@socket, :show, @owner)}
+    />
+  </.modal>
 <% end %>
 
 <ul>
