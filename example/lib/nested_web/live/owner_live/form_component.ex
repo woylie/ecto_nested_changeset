@@ -2,6 +2,7 @@ defmodule NestedWeb.OwnerLive.FormComponent do
   use NestedWeb, :live_component
 
   alias Nested.Members
+  alias Phoenix.HTML.Form
 
   @impl true
   def update(%{owner: owner} = assigns, socket) do
@@ -106,5 +107,102 @@ defmodule NestedWeb.OwnerLive.FormComponent do
 
   defp deleted?(form) do
     input_value(form, :delete) in ["true", true]
+  end
+
+  @impl Phoenix.LiveComponent
+  def handle_event("move-block-item-up", %{"index" => index}, socket) do
+    changeset = socket.assigns.changeset
+
+    index = String.to_integer(index)
+
+    block_item = EctoNestedChangeset.get_at(changeset, [:pets, index])
+    block_item_above = EctoNestedChangeset.get_at(changeset, [:pets, index - 1])
+
+    changeset =
+      changeset
+      |> Ecto.Changeset.change()
+      |> EctoNestedChangeset.update_at([:pets, index - 1, :name], fn _ ->
+        get_name(block_item)
+      end)
+      |> EctoNestedChangeset.update_at([:pets, index, :name], fn _ ->
+        get_name(block_item_above)
+      end)
+      |> IO.inspect(label: "moved up ")
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  @impl Phoenix.LiveComponent
+  def handle_event(
+        "move-block-item-down",
+        %{"index" => index},
+        socket
+      ) do
+    changeset = socket.assigns.changeset
+    index = String.to_integer(index)
+    IO.inspect(socket.assigns.changeset)
+
+    IO.inspect(EctoNestedChangeset.get_at(changeset, [:pets, index]),
+      label: "above"
+    )
+
+    IO.inspect(
+      EctoNestedChangeset.get_at(changeset, [:pets, index + 1]),
+      label: "below"
+    )
+
+    block_item = EctoNestedChangeset.get_at(changeset, [:pets, index])
+    block_item_below = EctoNestedChangeset.get_at(changeset, [:pets, index + 1])
+
+    changeset =
+      changeset
+      |> Ecto.Changeset.change()
+      |> EctoNestedChangeset.update_at([:pets, index, :name], fn _ ->
+        get_name(block_item_below)
+      end)
+      |> EctoNestedChangeset.update_at([:pets, index + 1, :name], fn _ ->
+        get_name(block_item)
+      end)
+
+    {:noreply, assign(socket, :changeset, changeset)}
+  end
+
+  defp get_name(%Ecto.Changeset{changes: %{}} = cs) do
+    {_, name} = Ecto.Changeset.fetch_field(cs, :name)
+    name
+  end
+
+  defp get_name(%Ecto.Changeset{changes: %{name: name}} = cs) do
+    name
+  end
+
+  defp get_name(%Nested.Members.Pet{} = pet) do
+    pet.name
+  end
+
+  defp has_more_than_one_block_item?(%Form{source: %{changes: %{pets: pets}}}) do
+    length =
+      pets
+      |> Enum.reject(&(&1.changes == %{delete: true}))
+      |> length()
+
+    if length > 1, do: true, else: false
+  end
+
+  defp has_more_than_one_block_item?(%Phoenix.HTML.Form{data: %{pets: pets}}) do
+    if length(pets) > 1, do: true, else: false
+  end
+
+  defp not_last_block_item?(%Form{source: %{changes: %{pets: pets}}}, index) do
+    length =
+      pets
+      |> Enum.reject(&(&1.changes == %{delete: true}))
+      |> length()
+
+    if length - 1 == index, do: false, else: true
+  end
+
+  defp not_last_block_item?(%Phoenix.HTML.Form{data: %{pets: pets}}, index) do
+    if length(pets) - 1 == index, do: false, else: true
   end
 end

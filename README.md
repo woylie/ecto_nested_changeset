@@ -84,7 +84,7 @@ mix phx.server
 
 Note that Postgres needs to be running to use the application.
 
-You can access the application at http://localhost:4000.
+You can access the application at http://localhost:4010.
 
 ## Status
 

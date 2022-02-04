@@ -2,6 +2,7 @@ defmodule Nested.MembersTest do
   use Nested.DataCase
 
   alias Nested.Members
+  alias Nested.Members.Pet
 
   describe "owners" do
     alias Nested.Members.Owner
@@ -45,6 +46,43 @@ defmodule Nested.MembersTest do
                Members.update_owner(owner, @update_attrs)
 
       assert owner.name == "some updated name"
+    end
+
+    @tag :this
+    test "flip flop existing struct" do
+      {:ok, owner} =
+        Members.create_owner(%{
+          name: "jack",
+          pets: [%{name: "holly"}, %{name: "judy"}]
+        })
+
+      owner =
+        owner
+        |> Ecto.Changeset.change()
+        |> EctoNestedChangeset.update_at([:pets, 1, :name], fn _ ->
+          "holly"
+        end)
+        |> EctoNestedChangeset.update_at([:pets, 0, :name], fn _ ->
+          "judy"
+        end)
+        |> EctoNestedChangeset.update_at([:pets, 1, :name], fn _ ->
+          "holly"
+        end)
+        |> EctoNestedChangeset.update_at([:pets, 0, :name], fn _ ->
+          "judy"
+        end)
+        |> EctoNestedChangeset.update_at([:pets, 1, :name], fn _ ->
+          "holly"
+        end)
+        |> EctoNestedChangeset.update_at([:pets, 0, :name], fn _ ->
+          "judy"
+        end)
+
+      Nested.Repo.update(owner)
+      |> IO.inspect()
+
+      # assert {:ok, %Owner{} = owner} =
+      #          Members.update_owner(owner, @update_attrs)
     end
 
     test "update_owner/2 with invalid data returns error changeset" do

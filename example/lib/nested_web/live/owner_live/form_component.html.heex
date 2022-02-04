@@ -32,6 +32,29 @@
             </div>
             <%= text_input fp, :name %>
             <%= error_tag fp, :name %>
+                <%= if has_more_than_one_block_item?(f) do %>
+                        <%= if fp.index != 0 do %>
+                          <a>
+                            <span 
+                                  phx-click="move-block-item-up"
+                                  phx-value-index={fp.index}
+                                  phx-target={@myself}>
+                              🔼
+                            </span>
+                          </a>
+                        <% end %>
+
+                        <%= if not_last_block_item?(f, fp.index) do %>
+                          <a>
+                            <span 
+                                  phx-click="move-block-item-down"
+                                  phx-value-index={fp.index}
+                                  phx-target={@myself}>
+                              🔽
+                            </span>
+                          </a>
+                        <% end %>
+                      <% end %>
 
             <fieldset>
               <legend>Toys</legend>
@@ -50,6 +73,7 @@
                         phx_value_toy_index: ft.index,
                         phx_target: @myself
                       %>
+                   
                     </div>
 
                     <%= text_input ft, :name %>

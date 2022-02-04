@@ -18,14 +18,16 @@ config :nested, Nested.Repo,
 config :nested, NestedWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}, port: 4000],
+  http: [ip: {127, 0, 0, 1}, port: 4010],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "WRzyTDbsrvQfb4XNNdhEoWSiqcwI1jVlwyVxai82DSKElgglDoQhjdG3/4JR+4a+",
+  secret_key_base:
+    "WRzyTDbsrvQfb4XNNdhEoWSiqcwI1jVlwyVxai82DSKElgglDoQhjdG3/4JR+4a+",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
+    esbuild:
+      {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 
 # ## SSL Support
