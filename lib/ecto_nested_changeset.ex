@@ -228,6 +228,28 @@ defmodule EctoNestedChangeset do
     nested_get(:get, changeset, path)
   end
 
+  @doc """
+  Moves the value in the to-many relation field or an array field
+  at the specified index to the index - 1 position.
+
+  The second to last path segment must be an atom referencing
+  either a to-many relation field or an array field.
+  The last path segment must be an integer.
+
+  ## Example
+
+      iex> %Owner{pets: [%Pet{}, %Pet{toys: [%Toy{name: "stick"}]}]}
+      ...> |> Ecto.Changeset.change()
+      ...> |> move_up(changeset, [:pets, 1])
+    %Owner{pets: [%Pet{toys: [%Toy{name: "stick"}]}, %Pet{}]}
+  """
+  @spec move_up(Changeset.t(), [atom | non_neg_integer]) :: any()
+  def move_up(%Changeset{} = changeset, path) do
+    index = path |> Enum.reverse() |> List.first()
+    path = Enum.drop(path, -1)
+    nested_update(:move_up, changeset, path, index)
+  end
+
   defp nested_update(operation, changeset, field, value) when is_atom(field),
     do: nested_update(operation, changeset, [field], value)
 
@@ -251,6 +273,18 @@ defmodule EctoNestedChangeset do
     data
     |> Changeset.change()
     |> Changeset.put_change(field, Map.fetch!(data, field) ++ [value])
+  end
+
+  defp nested_update(:move_up, %Changeset{} = changeset, [field], index)
+       when is_atom(field) do
+    list_field = get_change_or_field(changeset, field)
+    current_item = Enum.at(list_field, index)
+
+    {above_index, item_above} = find_previous_item(list_field, index - 1)
+
+    list_field
+    |> List.replace_at(index, item_above)
+    |> List.replace_at(above_index, current_item)
   end
 
   defp nested_update(:prepend, %Changeset{} = changeset, [field], value)
@@ -407,6 +441,17 @@ defmodule EctoNestedChangeset do
     case Map.fetch(changeset.changes, field) do
       {:ok, value} -> value
       :error -> Map.get(changeset.data, field)
+    end
+  end
+
+  defp find_previous_item(changeset_list_field, index)
+       when is_list(changeset_list_field) do
+    current_item = Enum.at(changeset_list_field, index)
+
+    if current_item |> change() |> Changeset.get_change(:delete) do
+      find_previous_item(changeset_list_field, index - 1)
+    else
+      {index, current_item}
     end
   end
 end
