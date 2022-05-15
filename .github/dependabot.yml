@@ -3,10 +3,8 @@ updates:
   - package-ecosystem: mix
     directory: "/"
     schedule:
-      interval: daily
-    open-pull-requests-limit: 10
+      interval: weekly
   - package-ecosystem: mix
     directory: "/example"
     schedule:
-      interval: daily
-    open-pull-requests-limit: 10
+      interval: weekly
