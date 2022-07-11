@@ -14,6 +14,7 @@ defmodule EctoNestedChangesetTest do
 
     schema "categories" do
       has_many :posts, EctoNestedChangesetTest.Post, on_replace: :delete
+      embeds_many :blocks, EctoNestedChangesetTest.Block, on_replace: :delete
     end
   end
 
@@ -34,6 +35,15 @@ defmodule EctoNestedChangesetTest do
       field :tags, {:array, :string}, default: []
       belongs_to :category, EctoNestedChangesetTest.Category
       has_many :comments, EctoNestedChangesetTest.Comment
+    end
+  end
+
+  defmodule Block do
+    use Ecto.Schema
+
+    embedded_schema do
+      field :delete, :boolean, virtual: true, default: false
+      field :text, :string
     end
   end
 
@@ -566,6 +576,47 @@ defmodule EctoNestedChangesetTest do
                ]
              } = changeset.changes
     end
+
+    test "flip flop a field many times" do
+      changeset =
+        %Category{id: 1, blocks: [%Block{text: "jack"}]}
+        |> change()
+        |> append_at([:blocks], %Block{text: "mathias"})
+        |> update_at([:blocks, 1, :text], fn _ -> "jack" end)
+        |> update_at([:blocks, 0, :text], fn _ -> "mathias" end)
+        |> update_at([:blocks, 1, :text], fn _ -> "jack" end)
+        |> update_at([:blocks, 0, :text], fn _ -> "mathias" end)
+        |> update_at([:blocks, 1, :text], fn _ -> "jack" end)
+        |> update_at([:blocks, 0, :text], fn _ -> "mathias" end)
+
+      assert %{
+               blocks: [
+                 %Ecto.Changeset{
+                   action: :update,
+                   data: %Block{},
+                   changes: %{text: "mathias"},
+                   valid?: true
+                 },
+                 %Ecto.Changeset{
+                   action: :insert,
+                   data: %Block{},
+                   changes: %{text: "jack"},
+                   valid?: true
+                 }
+               ]
+             } = changeset.changes
+    end
+
+    # test "flip flops existing item" do
+    #   changeset =
+    #     %Category{blocks: [%Block{text: "jack"}]}
+    #     |> change()
+    #     |> append_at([:blocks], %Block{text: "mathias"})
+    #     |> Ecto.Changeset.apply_changes()
+
+    #   category = Ecto.Repo.insert(%Category{blocks: [%Block{text: "jack"}]})
+
+    #   IO.inspect(category)
 
     test "updates a list field" do
       changeset =
