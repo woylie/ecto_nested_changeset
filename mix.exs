@@ -39,7 +39,7 @@ defmodule EctoNestedChangeset.MixProject do
   defp deps do
     [
       {:credo, "~> 1.6.0", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.1.0", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.2.0", only: [:dev], runtime: false},
       {:ecto, "~> 3.7"},
       {:ecto_sql, "~> 3.7", only: :test},
       {:ex_doc, "~> 0.25", only: :dev, runtime: false},
