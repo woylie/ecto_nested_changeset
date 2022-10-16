@@ -42,7 +42,7 @@ defmodule Nested.MixProject do
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.17.5"},
+      {:phoenix_live_view, "~> 0.18.2"},
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"}
     ]
