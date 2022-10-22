@@ -13,7 +13,11 @@ config :nested,
 # Configures the endpoint
 config :nested, NestedWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: NestedWeb.ErrorView, accepts: ~w(html json), layout: false],
+  render_errors: [
+    view: NestedWeb.ErrorView,
+    accepts: ~w(html json),
+    layout: false
+  ],
   pubsub_server: Nested.PubSub,
   live_view: [signing_salt: "mi1bglNb"]
 

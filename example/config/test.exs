@@ -17,7 +17,8 @@ config :nested, Nested.Repo,
 # you can enable the server option below.
 config :nested, NestedWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "pSQGEGRX/buCoE5b+2Aise6wQcWRsVOxbj9ZPlRW6H1YIIo05iTGAo2Vl7dq8epg",
+  secret_key_base:
+    "pSQGEGRX/buCoE5b+2Aise6wQcWRsVOxbj9ZPlRW6H1YIIo05iTGAo2Vl7dq8epg",
   server: false
 
 # Print only warnings and errors during test
