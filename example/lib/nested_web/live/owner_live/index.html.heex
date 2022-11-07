@@ -4,7 +4,7 @@
   <.modal return_to={Routes.owner_index_path(@socket, :index)}>
     <.live_component
       module={NestedWeb.OwnerLive.FormComponent}
-      id={@owner.id || :new},
+      id={@owner.id || :new}
       title={@page_title}
       action={@live_action}
       owner={@owner}
@@ -27,13 +27,32 @@
         <td><%= owner.name %></td>
 
         <td>
-          <span><%= live_redirect "Show", to: Routes.owner_show_path(@socket, :show, owner) %></span>
-          <span><%= live_patch "Edit", to: Routes.owner_index_path(@socket, :edit, owner) %></span>
-          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: owner.id, data: [confirm: "Are you sure?"] %></span>
+          <span>
+            <.link navigate={Routes.owner_show_path(@socket, :show, owner)}>
+              Show
+            </.link>
+          </span>
+          <span>
+            <.link patch={Routes.owner_index_path(@socket, :edit, owner)}>
+              Edit
+            </.link>
+          </span>
+          <span>
+            <.link
+              href="#"
+              phx-click="delete"
+              phx-value-id={owner.id}
+              data-confirm="Are you sure?"
+            >
+              Delete
+            </.link>
+          </span>
         </td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<span><%= live_patch "New Owner", to: Routes.owner_index_path(@socket, :new) %></span>
+<span>
+  <.link patch={Routes.owner_index_path(@socket, :new)}>New Owner</.link>
+</span>

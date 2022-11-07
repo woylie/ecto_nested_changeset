@@ -35,9 +35,18 @@ defmodule NestedWeb.LiveHelpers do
         phx-key="escape"
       >
         <%= if @return_to do %>
-          <.link patch={@return_to} id="close" class="phx-modal-close" phx-click={hide_modal()}>✖</.link>
+          <.link
+            patch={@return_to}
+            id="close"
+            class="phx-modal-close"
+            phx-click={hide_modal()}
+          >
+            ✖
+          </.link>
         <% else %>
-         <a id="close" href="#" class="phx-modal-close" phx-click={hide_modal()}>✖</a>
+          <a id="close" href="#" class="phx-modal-close" phx-click={hide_modal()}>
+            ✖
+          </a>
         <% end %>
 
         <%= render_slot(@inner_block) %>
