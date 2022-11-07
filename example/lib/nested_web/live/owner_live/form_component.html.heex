@@ -2,16 +2,16 @@
   <h2><%= @title %></h2>
 
   <.form
-    let={f}
+    :let={f}
     for={@changeset}
     id="owner-form"
     phx-target={@myself}
     phx-change="validate"
     phx-submit="save"
   >
-    <%= label f, :name %>
-    <%= text_input f, :name %>
-    <%= error_tag f, :name %>
+    <%= label(f, :name) %>
+    <%= text_input(f, :name) %>
+    <%= error_tag(f, :name) %>
 
     <fieldset>
       <legend>Pets</legend>
@@ -22,16 +22,18 @@
 
           <%= unless deleted?(fp) do %>
             <div class="label-wrapper">
-              <%= label fp, :name %>
-              <%= link "remove",
-                to: "#",
-                phx_click: "remove-pet",
-                phx_value_pet_index: fp.index,
-                phx_target: @myself
-              %>
+              <%= label(fp, :name) %>
+              <.link
+                href="#"
+                phx-click="remove-pet"
+                phx-value-pet-index={fp.index}
+                phx-target={@myself}
+              >
+                remove
+              </.link>
             </div>
-            <%= text_input fp, :name %>
-            <%= error_tag fp, :name %>
+            <%= text_input(fp, :name) %>
+            <%= error_tag(fp, :name) %>
 
             <fieldset>
               <legend>Toys</legend>
@@ -42,41 +44,42 @@
 
                   <%= unless deleted?(ft) do %>
                     <div class="label-wrapper">
-                      <%= label ft, :name %>
-                      <%= link "remove",
-                        to: "#",
-                        phx_click: "remove-toy",
-                        phx_value_pet_index: fp.index,
-                        phx_value_toy_index: ft.index,
-                        phx_target: @myself
-                      %>
+                      <%= label(ft, :name) %>
+                      <.link
+                        href="#"
+                        phx-click="remove-toy"
+                        phx-value-pet-index={fp.index}
+                        phx-value-toy-index={ft.index}
+                        phx-target={@myself}
+                      >
+                        remove
+                      </.link>
                     </div>
 
-                    <%= text_input ft, :name %>
-                    <%= error_tag ft, :name %>
+                    <%= text_input(ft, :name) %>
+                    <%= error_tag(ft, :name) %>
                   <% end %>
                 <% end %>
 
-                <%= link "add toy",
-                  to: "#",
-                  class: "button",
-                  phx_click: "add-toy",
-                  phx_value_pet_index: fp.index,
-                  phx_target: @myself
-                %>
+                <.link
+                  href="#"
+                  class="button"
+                  phx-click="add-toy"
+                  phx-value-pet-index={fp.index}
+                  phx-target={@myself}
+                >
+                  add toy
+                </.link>
               </div>
             </fieldset>
           <% end %>
         <% end %>
-        <%= link "add pet",
-          to: "#",
-          class: "button",
-          phx_click: "add-pet",
-          phx_target: @myself
-        %>
+        <.link href="#" phx-click="add-pet" phx-target={@myself} class="button">
+          add pet
+        </.link>
       </div>
     </fieldset>
 
-    <%= submit "Save", phx_disable_with: "Saving..." %>
+    <%= submit("Save", phx_disable_with: "Saving...") %>
   </.form>
 </div>
