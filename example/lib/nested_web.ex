@@ -44,7 +44,7 @@ defmodule NestedWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {NestedWeb.LayoutView, "live.html"}
+        layout: {NestedWeb.LayoutView, :live}
 
       unquote(view_helpers())
     end
