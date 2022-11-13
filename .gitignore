@@ -25,4 +25,7 @@ ecto_nested_changeset-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
+# Ignore dialyzer PLT
+.plts
+
 .elixir_ls
