@@ -21,6 +21,9 @@ defmodule EctoNestedChangeset.MixProject do
         "coveralls.html": :test,
         "coveralls.github": :test
       ],
+      dialyzer: [
+        plt_file: {:no_warn, ".plts/dialyzer.plt"}
+      ],
       source_url: @source_url,
       homepage_url: @source_url,
       package: package(),
