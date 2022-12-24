@@ -13,8 +13,8 @@ on:
       - main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  tests:
+    runs-on: ubuntu-20.04
     name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
     strategy:
       matrix:
@@ -55,9 +55,70 @@ jobs:
       - name: Run Tests
         run: mix coveralls.github
 
-  lint:
+  matrix-results:
+    if: ${{ always() }}
     runs-on: ubuntu-latest
-    name: Lint
+    name: Tests
+    needs:
+      - tests
+    steps:
+      - run: |
+          result="${{ needs.tests.result }}"
+          if [[ $result == "success" ]]; then
+            exit 0
+          else
+            exit 1
+          fi
+
+  example-tests:
+    runs-on: ubuntu-20.04
+    name: Example application tests
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    defaults:
+      run:
+        working-directory: example
+
+    services:
+      postgres:
+        image: postgres:12-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: erlef/setup-beam@v1
+        id: beam
+        with:
+          otp-version: ${{ env.OTP_VERSION }}
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+      - name: Restore dependencies and build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            _build
+            deps
+          key: example-${{ runner.os }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-mix-${{ hashFiles('mix.lock') }}
+          restore-keys: example-${{ runner.os }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-
+      - name: Install Dependencies
+        run: |
+          mix local.rebar --force
+          mix local.hex --force
+          mix deps.get
+      - name: Run Tests
+        run: mix test
+
+  code-quality:
+    runs-on: ubuntu-20.04
+    name: Code Quality
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
