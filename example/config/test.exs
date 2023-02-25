@@ -18,11 +18,11 @@ config :nested, Nested.Repo,
 config :nested, NestedWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base:
-    "pSQGEGRX/buCoE5b+2Aise6wQcWRsVOxbj9ZPlRW6H1YIIo05iTGAo2Vl7dq8epg",
+    "WUUtaz+HV20DZKcWB9Eamdp0BVbKyxBqLYtC+7wUvdT+R9G+yc/YN8yIU14pBURr",
   server: false
 
 # Print only warnings and errors during test
-config :logger, level: :warn
+config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
