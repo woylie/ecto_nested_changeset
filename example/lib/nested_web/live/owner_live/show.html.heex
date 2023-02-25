@@ -1,43 +1,42 @@
-<h1>Show Owner</h1>
+<.header>
+  Owner <%= @owner.id %>
+  <:subtitle>This is an owner record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/owners/#{@owner}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit owner</.button>
+    </.link>
+  </:actions>
+</.header>
 
-<%= if @live_action in [:edit] do %>
-  <.modal return_to={Routes.owner_show_path(@socket, :show, @owner)}>
-    <.live_component
-      module={NestedWeb.OwnerLive.FormComponent}
-      id={@owner.id}
-      title={@page_title}
-      action={@live_action}
-      owner={@owner}
-      return_to={Routes.owner_show_path(@socket, :show, @owner)}
-    />
-  </.modal>
-<% end %>
-
-<ul>
-  <li>
-    <strong>Name:</strong>
-    <%= @owner.name %>
-  </li>
-</ul>
+<.list>
+  <:item title="Name"><%= @owner.name %></:item>
+</.list>
 
 <h2>Pets</h2>
 
 <ul>
-  <%= for pet <- @owner.pets do %>
-    <li>
-      <strong>Name:</strong> <%= pet.name %>,
-      <strong>Toys:</strong> <%= pet.toys
-      |> Enum.map(& &1.name)
-      |> Enum.join(", ") %>
-    </li>
-  <% end %>
+  <li :for={pet <- @owner.pets}>
+    <strong>Name:</strong> <%= pet.name %>,
+    <strong>Toys:</strong> <%= pet.toys
+    |> Enum.map(& &1.name)
+    |> Enum.join(", ") %>
+  </li>
 </ul>
 
-<span>
-  <.link patch={Routes.owner_show_path(@socket, :edit, @owner)} class="button">
-    Edit
-  </.link>
-</span>
-<span>
-  <.link navigate={Routes.owner_index_path(@socket, :index)}>Back</.link>
-</span>
+<.back navigate={~p"/owners"}>Back to owners</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="owner-modal"
+  show
+  on_cancel={JS.patch(~p"/owners/#{@owner}")}
+>
+  <.live_component
+    module={NestedWeb.OwnerLive.FormComponent}
+    id={@owner.id}
+    title={@page_title}
+    action={@live_action}
+    owner={@owner}
+    patch={~p"/owners/#{@owner}"}
+  />
+</.modal>

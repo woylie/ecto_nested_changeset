@@ -1,58 +1,46 @@
-<h1>Listing Owners</h1>
+<.header>
+  Listing Owners
+  <:actions>
+    <.link patch={~p"/owners/new"}>
+      <.button>New Owner</.button>
+    </.link>
+  </:actions>
+</.header>
 
-<%= if @live_action in [:new, :edit] do %>
-  <.modal return_to={Routes.owner_index_path(@socket, :index)}>
-    <.live_component
-      module={NestedWeb.OwnerLive.FormComponent}
-      id={@owner.id || :new}
-      title={@page_title}
-      action={@live_action}
-      owner={@owner}
-      return_to={Routes.owner_index_path(@socket, :index)}
-    />
-  </.modal>
-<% end %>
+<.table
+  id="owners"
+  rows={@streams.owners}
+  row_click={fn {_id, owner} -> JS.navigate(~p"/owners/#{owner}") end}
+>
+  <:col :let={{_id, owner}} label="Name"><%= owner.name %></:col>
+  <:action :let={{_id, owner}}>
+    <div class="sr-only">
+      <.link navigate={~p"/owners/#{owner}"}>Show</.link>
+    </div>
+    <.link patch={~p"/owners/#{owner}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, owner}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: owner.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
 
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-
-      <th></th>
-    </tr>
-  </thead>
-  <tbody id="owners">
-    <%= for owner <- @owners do %>
-      <tr id={"owner-#{owner.id}"}>
-        <td><%= owner.name %></td>
-
-        <td>
-          <span>
-            <.link navigate={Routes.owner_show_path(@socket, :show, owner)}>
-              Show
-            </.link>
-          </span>
-          <span>
-            <.link patch={Routes.owner_index_path(@socket, :edit, owner)}>
-              Edit
-            </.link>
-          </span>
-          <span>
-            <.link
-              href="#"
-              phx-click="delete"
-              phx-value-id={owner.id}
-              data-confirm="Are you sure?"
-            >
-              Delete
-            </.link>
-          </span>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<span>
-  <.link patch={Routes.owner_index_path(@socket, :new)}>New Owner</.link>
-</span>
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="owner-modal"
+  show
+  on_cancel={JS.navigate(~p"/owners")}
+>
+  <.live_component
+    module={NestedWeb.OwnerLive.FormComponent}
+    id={@owner.id || :new}
+    title={@page_title}
+    action={@live_action}
+    owner={@owner}
+    patch={~p"/owners"}
+  />
+</.modal>

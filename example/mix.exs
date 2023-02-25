@@ -5,9 +5,8 @@ defmodule Nested.MixProject do
     [
       app: :nested,
       version: "0.1.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -34,17 +33,21 @@ defmodule Nested.MixProject do
   defp deps do
     [
       {:ecto_nested_changeset, path: ".."},
-      {:ecto_sql, "~> 3.7"},
-      {:esbuild, "~> 0.3", runtime: Mix.env() == :dev},
+      {:ecto_sql, "~> 3.6"},
+      {:esbuild, "~> 0.5", runtime: Mix.env() == :dev},
       {:floki, ">= 0.30.0", only: :test},
+      {:heroicons, "~> 0.5"},
       {:jason, "~> 1.2"},
-      {:phoenix, "~> 1.6.6"},
+      {:phoenix, "~> 1.7.0"},
       {:phoenix_ecto, "~> 4.4"},
-      {:phoenix_html, "~> 3.0"},
+      {:phoenix_html, "~> 3.3"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.18.2"},
+      {:phoenix_live_view, "~> 0.18.16"},
       {:plug_cowboy, "~> 2.5"},
-      {:postgrex, ">= 0.0.0"}
+      {:postgrex, ">= 0.0.0"},
+      {:tailwind, "~> 0.1.8", runtime: Mix.env() == :dev},
+      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_poller, "~> 1.0"}
     ]
   end
 
@@ -56,11 +59,20 @@ defmodule Nested.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup"],
+      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      "assets.deploy": ["esbuild default --minify", "phx.digest"]
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing"
+      ],
+      "assets.build": ["tailwind default", "esbuild default"],
+      "assets.deploy": [
+        "tailwind default --minify",
+        "esbuild default --minify",
+        "phx.digest"
+      ]
     ]
   end
 end

@@ -6,7 +6,7 @@ defmodule NestedWeb.OwnerLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :owners, list_owners())}
+    {:ok, stream(socket, :owners, Members.list_owners())}
   end
 
   @impl true
@@ -33,14 +33,15 @@ defmodule NestedWeb.OwnerLive.Index do
   end
 
   @impl true
+  def handle_info({NestedWeb.OwnerLive.FormComponent, {:saved, owner}}, socket) do
+    {:noreply, stream_insert(socket, :owners, owner)}
+  end
+
+  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     owner = Members.get_owner!(id)
     {:ok, _} = Members.delete_owner(owner)
 
-    {:noreply, assign(socket, :owners, list_owners())}
-  end
-
-  defp list_owners do
-    Members.list_owners()
+    {:noreply, stream_delete(socket, :owners, owner)}
   end
 end

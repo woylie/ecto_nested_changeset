@@ -7,7 +7,8 @@ defmodule NestedWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_nested_key",
-    signing_salt: "Oc7KUFJn"
+    signing_salt: "XO/KciJl",
+    same_site: "Lax"
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
@@ -21,7 +22,7 @@ defmodule NestedWeb.Endpoint do
     at: "/",
     from: :nested,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only: NestedWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

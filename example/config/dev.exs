@@ -6,6 +6,7 @@ config :nested, Nested.Repo,
   password: "postgres",
   hostname: "localhost",
   database: "nested_dev",
+  stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
@@ -23,11 +24,11 @@ config :nested, NestedWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base:
-    "WRzyTDbsrvQfb4XNNdhEoWSiqcwI1jVlwyVxai82DSKElgglDoQhjdG3/4JR+4a+",
+    "avkKB0s5o4Ge/yuOB1nNkEENMGgGXtD5EYYMsgKrYzCvWjA8FKe1hmkfqtQWNT1j",
   watchers: [
-    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild:
-      {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
+      {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 
 # ## SSL Support
@@ -38,7 +39,6 @@ config :nested, NestedWeb.Endpoint,
 #
 #     mix phx.gen.cert
 #
-# Note that this task requires Erlang/OTP 20 or later.
 # Run `mix help phx.gen.cert` for more information.
 #
 # The `http:` config above can be replaced with:
@@ -59,10 +59,12 @@ config :nested, NestedWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"lib/nested_web/(live|views)/.*(ex)$",
-      ~r"lib/nested_web/templates/.*(eex)$"
+      ~r"lib/nested_web/(controllers|live|components)/.*(ex|heex)$"
     ]
   ]
+
+# Enable dev routes for dashboard and mailbox
+config :nested, dev_routes: true
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
