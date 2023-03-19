@@ -40,39 +40,39 @@ defmodule NestedWeb.OwnerLive.FormComponent do
                 >
                   <Heroicons.x_mark mini class="h-4 w-4" /> remove
                 </.link>
-              </div>
 
-              <fieldset>
-                <legend>Toys</legend>
-                <div class="clear-both">
-                  <.inputs_for :let={ft} field={fp[:toys]}>
-                    <.input field={ft[:delete]} type="hidden" />
-                    <div :if={!deleted?(ft)} class="mt-4">
-                      <.input field={ft[:name]} type="text" label="Name" />
+                <fieldset>
+                  <legend>Toys</legend>
+                  <div class="clear-both">
+                    <.inputs_for :let={ft} field={fp[:toys]}>
+                      <.input field={ft[:delete]} type="hidden" />
+                      <div :if={!deleted?(ft)} class="mt-4">
+                        <.input field={ft[:name]} type="text" label="Name" />
+                        <.link
+                          phx-click="remove-toy"
+                          phx-value-pet-index={fp.index}
+                          phx-value-toy-index={ft.index}
+                          phx-target={@myself}
+                          class="flex items-center"
+                        >
+                          <Heroicons.x_mark mini class="h-4 w-4" /> remove
+                        </.link>
+                      </div>
+                    </.inputs_for>
+
+                    <div class="mt-4">
                       <.link
-                        phx-click="remove-toy"
+                        phx-click="add-toy"
                         phx-value-pet-index={fp.index}
-                        phx-value-toy-index={ft.index}
                         phx-target={@myself}
                         class="flex items-center"
                       >
-                        <Heroicons.x_mark mini class="h-4 w-4" /> remove
+                        <Heroicons.plus mini class="h-4 w-4" /> add toy
                       </.link>
                     </div>
-                  </.inputs_for>
-
-                  <div class="mt-4">
-                    <.link
-                      phx-click="add-toy"
-                      phx-value-pet-index={fp.index}
-                      phx-target={@myself}
-                      class="flex items-center"
-                    >
-                      <Heroicons.plus mini class="h-4 w-4" /> add toy
-                    </.link>
                   </div>
-                </div>
-              </fieldset>
+                </fieldset>
+              </div>
             </.inputs_for>
 
             <div class="mt-4">
