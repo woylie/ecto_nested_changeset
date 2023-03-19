@@ -4,6 +4,10 @@ defmodule NestedWeb.OwnerLiveTest do
   import Nested.MembersFixtures
   import Phoenix.LiveViewTest
 
+  alias Nested.Members.Pet
+  alias Nested.Members.Toy
+  alias Nested.Repo
+
   @create_attrs %{
     name: "some name",
     pets: [%{name: "George", toys: [%{name: "ball"}]}]
@@ -186,6 +190,55 @@ defmodule NestedWeb.OwnerLiveTest do
       html = render(show_live)
       assert html =~ "Owner updated successfully"
       assert html =~ "some updated name"
+    end
+
+    test "adds and removes pet and toy inputs", %{conn: conn, owner: owner} do
+      %{id: pet2_id} =
+        pet2 = Repo.insert!(%Pet{name: "Pam", owner_id: owner.id})
+
+      %{id: toy2_id} = Repo.insert!(%Toy{name: "Plushy", pet_id: pet2.id})
+      Repo.insert!(%Toy{name: "Stick", pet_id: pet2.id})
+      {:ok, show_live, _html} = live(conn, ~p"/owners/#{owner}")
+
+      assert show_live |> element("a", "Edit") |> render_click() =~
+               "Edit Owner"
+
+      assert_patch(show_live, ~p"/owners/#{owner}/show/edit")
+
+      show_live
+      |> element(
+        ~s(a[phx-click="remove-toy"][phx-value-pet-index="1"][phx-value-toy-index="1"]),
+        "remove"
+      )
+      |> render_click()
+
+      refute show_live
+             |> element("input#owner_pets_1_toys_1_name")
+             |> has_element?()
+
+      show_live
+      |> element(
+        ~s(a[phx-click="remove-pet"][phx-value-pet-index="0"]),
+        "remove"
+      )
+      |> render_click()
+
+      refute show_live
+             |> element("input#owner_pets_0_name")
+             |> has_element?()
+
+      refute show_live
+             |> element("input#owner_pets_0_toys_0_name")
+             |> has_element?()
+
+      assert show_live
+             |> form("#owner-form")
+             |> render_submit()
+
+      assert_patch(show_live, ~p"/owners/#{owner}")
+
+      assert [%Toy{id: ^toy2_id}] = Repo.all(Toy)
+      assert [%Pet{id: ^pet2_id}] = Repo.all(Pet)
     end
   end
 end

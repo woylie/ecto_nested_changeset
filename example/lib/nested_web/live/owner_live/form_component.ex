@@ -28,7 +28,12 @@ defmodule NestedWeb.OwnerLive.FormComponent do
 
           <div class="clear-both">
             <.inputs_for :let={fp} field={@form[:pets]}>
-              <.input field={fp[:delete]} type="hidden" />
+              <input
+                :if={deleted?(fp)}
+                name={fp[:delete].name}
+                type="hidden"
+                value="true"
+              />
 
               <div :if={!deleted?(fp)}>
                 <.input field={fp[:name]} type="text" label="Name" />
@@ -45,7 +50,12 @@ defmodule NestedWeb.OwnerLive.FormComponent do
                   <legend>Toys</legend>
                   <div class="clear-both">
                     <.inputs_for :let={ft} field={fp[:toys]}>
-                      <.input field={ft[:delete]} type="hidden" />
+                      <input
+                        :if={deleted?(ft)}
+                        name={ft[:delete].name}
+                        type="hidden"
+                        value="true"
+                      />
                       <div :if={!deleted?(ft)} class="mt-4">
                         <.input field={ft[:name]} type="text" label="Name" />
                         <.link

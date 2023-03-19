@@ -6,6 +6,8 @@ defmodule Nested.Members do
   import Ecto.Query, warn: false
 
   alias Nested.Members.Owner
+  alias Nested.Members.Pet
+  alias Nested.Members.Toy
   alias Nested.Repo
 
   @doc """
@@ -19,7 +21,7 @@ defmodule Nested.Members do
   """
   def list_owners do
     Owner
-    |> preload(pets: [:toys])
+    |> preload_owner_assocs()
     |> Repo.all()
   end
 
@@ -40,7 +42,7 @@ defmodule Nested.Members do
   def get_owner!(id) do
     Owner
     |> where(id: ^id)
-    |> preload(pets: [:toys])
+    |> preload_owner_assocs()
     |> Repo.one!()
   end
 
@@ -108,5 +110,12 @@ defmodule Nested.Members do
   """
   def change_owner(%Owner{} = owner, attrs \\ %{}) do
     Owner.changeset(owner, attrs)
+  end
+
+  def preload_owner_assocs(query) do
+    pets_query = from p in Pet, order_by: p.id
+    toys_query = from t in Toy, order_by: t.id
+
+    preload(query, pets: ^{pets_query, toys: toys_query})
   end
 end
