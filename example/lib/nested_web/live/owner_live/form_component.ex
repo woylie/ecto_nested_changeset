@@ -2,6 +2,7 @@ defmodule NestedWeb.OwnerLive.FormComponent do
   use NestedWeb, :live_component
 
   alias Nested.Members
+  alias Phoenix.HTML.Form
 
   @impl true
   def render(assigns) do
@@ -205,6 +206,6 @@ defmodule NestedWeb.OwnerLive.FormComponent do
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
 
   defp deleted?(form) do
-    form[:delete].value == "true"
+    Form.normalize_value("checkbox", form[:delete].value)
   end
 end
