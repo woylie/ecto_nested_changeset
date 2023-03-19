@@ -115,7 +115,7 @@ defmodule NestedWeb.OwnerLiveTest do
       |> render_click()
 
       refute new_live
-             |> element("input#form_pets_0_toys_1_name")
+             |> element("input#owner_pets_0_toys_1_name")
              |> has_element?()
     end
 
