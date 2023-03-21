@@ -1,4 +1,7 @@
 defmodule Nested.Members.Owner do
+  @moduledoc """
+  Schema for pet owners.
+  """
   use Ecto.Schema
   import Ecto.Changeset
   alias Nested.Members.Pet

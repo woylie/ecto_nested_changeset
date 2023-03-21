@@ -1,4 +1,7 @@
 defmodule Nested.Helpers do
+  @moduledoc """
+  Defines a helper function for handling deletions of associations.
+  """
   import Ecto.Changeset
   alias Ecto.Changeset
 
