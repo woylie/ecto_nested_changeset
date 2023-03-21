@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## [0.2.1] - 2023-03-21
+
+### Changed
+
+- Update dev dependencies.
+- Update example application with Phoenix 1.7.
+
 ## [0.2.0] - 2022-01-06
 
 ### Added
