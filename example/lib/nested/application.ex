@@ -8,8 +8,6 @@ defmodule Nested.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Telemetry supervisor
-      NestedWeb.Telemetry,
       # Start the Ecto repository
       Nested.Repo,
       # Start the PubSub system
