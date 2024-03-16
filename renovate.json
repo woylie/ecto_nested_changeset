@@ -27,8 +27,8 @@
         "sobelow",
         "stream_data"
       ],
-      "rangeStrategy": "auto"
+      "rangeStrategy": "auto",
       "automerge": true
-    },
+    }
   ]
 }
