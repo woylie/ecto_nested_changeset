@@ -10,7 +10,7 @@
   "schedule": ["every weekend"],
   "timezone": "Asia/Tokyo",
   "lockFileMaintenance": { "enabled": true },
-  "rangeStrategy": "widen",
+  "rangeStrategy": "in-range-only",
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
