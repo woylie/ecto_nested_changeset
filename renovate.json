@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices"],
+  "extends": ["config:recommended"],
   "enabled": true,
   "enabledManagers": [
     "github-actions",
@@ -30,5 +30,6 @@
       "rangeStrategy": "auto",
       "automerge": true
     }
-  ]
+  ],
+  "ignoreDeps": ["postgres"]
 }
