@@ -4,7 +4,7 @@
   "enabled": true,
   "enabledManagers": [
     "github-actions",
-    "mix",
+    "mix"
   ],
   "reviewersFromCodeOwners": true,
   "schedule": ["every weekend"],
