@@ -38,14 +38,14 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - uses: erlef/setup-beam@2f0cc07b4b9bea248ae098aba9e1a8a1de5ec24c # v1
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
         id: beam
         with:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
       - name: Restore dependencies and build cache
-        uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4
+        uses: actions/cache@v4
         with:
           path: |
             _build
@@ -99,14 +99,14 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - uses: erlef/setup-beam@2f0cc07b4b9bea248ae098aba9e1a8a1de5ec24c # v1
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
         id: beam
         with:
           otp-version: ${{ env.OTP_VERSION }}
           elixir-version: ${{ env.ELIXIR_VERSION }}
       - name: Restore dependencies and build cache
-        uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4
+        uses: actions/cache@v4
         with:
           path: |
             _build
@@ -128,15 +128,15 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
-      - uses: erlef/setup-beam@2f0cc07b4b9bea248ae098aba9e1a8a1de5ec24c # v1
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
         id: beam
         with:
           otp-version: ${{ env.OTP_VERSION }}
           elixir-version: ${{ env.ELIXIR_VERSION }}
 
       - name: Restore dependencies and build cache
-        uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4
+        uses: actions/cache@v4
         with:
           path: |
             _build
@@ -144,7 +144,7 @@ jobs:
           key: ${{ runner.os }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-mix-${{ hashFiles('mix.lock') }}
           restore-keys: ${{ runner.os }}-otp-${{ steps.beam.outputs.otp-version }}-elixir-${{ steps.beam.outputs.elixir-version }}-
       - name: Restore PLT cache
-        uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4
+        uses: actions/cache@v4
         id: plt_cache
         with:
           key: |
