@@ -48,7 +48,7 @@ defmodule EctoNestedChangeset.MixProject do
       {:ecto_sql, "~> 3.7", only: :test},
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18.0", only: :test},
-      {:stream_data, "~> 0.5", only: [:dev, :test]}
+      {:stream_data, "~> 0.6", only: [:dev, :test]}
     ]
   end
 
