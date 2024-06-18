@@ -913,4 +913,45 @@ defmodule EctoNestedChangesetTest do
       |> get_at([:posts])
     end
   end
+
+  describe "move_up/2" do
+    test "moves an item up in a list " do
+      field =
+        %Category{
+          id: 1,
+          posts: [%Post{id: 1, title: "first"}, %Post{id: 2, title: "second"}]
+        }
+        |> change()
+        |> move_up([:posts, 1])
+
+      assert field == [
+               %Post{id: 2, title: "second"},
+               %Post{id: 1, title: "first"}
+             ]
+    end
+
+    test "moves an item up with its children" do
+      field =
+        %Category{
+          id: 1,
+          posts: [
+            %Post{id: 1, title: "first", comments: [%Comment{id: 1}]},
+            %Post{id: 2, title: "second", comments: [%Comment{id: 2}]}
+          ]
+        }
+        |> change()
+        |> move_up([:posts, 1])
+
+      assert field == [
+               %Post{id: 2, title: "second", comments: [%Comment{id: 2}]},
+               %Post{id: 1, title: "first", comments: [%Comment{id: 1}]}
+             ]
+    end
+
+    test "does not move up when the item is the first in the list" do
+    end
+
+    test "does not move up when there is only one item in the list" do
+    end
+  end
 end
