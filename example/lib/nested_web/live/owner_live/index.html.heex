@@ -12,7 +12,7 @@
   rows={@streams.owners}
   row_click={fn {_id, owner} -> JS.navigate(~p"/owners/#{owner}") end}
 >
-  <:col :let={{_id, owner}} label="Name"><%= owner.name %></:col>
+  <:col :let={{_id, owner}} label="Name">{owner.name}</:col>
   <:action :let={{_id, owner}}>
     <div class="sr-only">
       <.link navigate={~p"/owners/#{owner}"}>Show</.link>
