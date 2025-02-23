@@ -88,8 +88,5 @@ You can access the application at http://localhost:4000.
 
 ## Status
 
-This library has a very narrow purpose, which means that even though it is
-young, it is unlikely that new functionality is going to be added or that the
-API is going to change. Should you miss something, though, don't hesitate to
-open an issue. Any issues and problems that may arise will be dealt with
-swiftly.
+This library is actively maintained, but given its narrow purpose, it will not
+see frequent updates.
