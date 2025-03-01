@@ -45,7 +45,7 @@ defmodule Nested.MixProject do
       {:phoenix_live_view, "~> 1.0.0"},
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
-      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev}
+      {:tailwind, "~> 0.3.1", runtime: Mix.env() == :dev}
     ]
   end
 
