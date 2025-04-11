@@ -41,14 +41,14 @@ defmodule EctoNestedChangeset.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:castore, "~> 1.0", only: :test},
-      {:credo, "~> 1.7.0", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.4.1", only: [:dev], runtime: false},
+      {:castore, "== 1.0.12", only: :test},
+      {:credo, "== 1.7.11", only: [:dev, :test], runtime: false},
+      {:dialyxir, "== 1.4.5", only: [:dev], runtime: false},
       {:ecto, "~> 3.7"},
-      {:ecto_sql, "~> 3.7", only: :test},
-      {:ex_doc, "~> 0.37", only: :dev, runtime: false},
-      {:excoveralls, "~> 0.18.0", only: :test},
-      {:stream_data, "~> 1.0", only: [:dev, :test]}
+      {:ecto_sql, "== 3.12.1", only: :test},
+      {:ex_doc, "== 0.37.3", only: :dev, runtime: false},
+      {:excoveralls, "== 0.18.5", only: :test},
+      {:stream_data, "== 1.2.0", only: [:dev, :test]}
     ]
   end
 
