@@ -18,6 +18,12 @@
   },
   "automerge": true,
   "rangeStrategy": "widen",
+  "packageRules": [
+    {
+      "matchDepTypes": ["dev"],
+      "rangeStrategy": "pin"
+    }
+  ],
   "ignoreDeps": [
     "postgres"
   ]
