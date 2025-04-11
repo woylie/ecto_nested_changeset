@@ -1,14 +1,17 @@
 version: 2
 updates:
   - package-ecosystem: mix
+    open-pull-requests-limit: 0
     directory: "/"
     schedule:
       interval: monthly
   - package-ecosystem: mix
+    open-pull-requests-limit: 0
     directory: "/example"
     schedule:
       interval: monthly
   - package-ecosystem: github-actions
+    open-pull-requests-limit: 0
     directory: "/"
     schedule:
       interval: monthly
