@@ -39,7 +39,7 @@ defmodule Nested.MixProject do
       {:heroicons, "== 0.5.6"},
       {:jason, "== 1.4.4"},
       {:phoenix, "== 1.7.21"},
-      {:phoenix_ecto, "== 4.6.4"},
+      {:phoenix_ecto, "== 4.6.5"},
       {:phoenix_html, "== 4.2.1"},
       {:phoenix_live_reload, "== 1.6.0", only: :dev},
       {:phoenix_live_view, "== 1.0.12"},
