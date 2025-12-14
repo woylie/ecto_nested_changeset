@@ -40,7 +40,7 @@ defmodule Nested.MixProject do
       {:jason, "1.4.4"},
       {:phoenix, "1.8.3"},
       {:phoenix_ecto, "== 4.7.0"},
-      {:phoenix_html, "4.2.1"},
+      {:phoenix_html, "== 4.3.0"},
       {:phoenix_live_reload, "1.6.2", only: :dev},
       {:phoenix_live_view, "1.0.12"},
       {:plug_cowboy, "2.7.5"},
