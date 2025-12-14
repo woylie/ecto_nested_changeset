@@ -50,7 +50,7 @@ defmodule EctoNestedChangeset.MixProject do
       {:credo, "1.7.14", only: [:dev, :test], runtime: false},
       {:dialyxir, "== 1.4.7", only: [:dev], runtime: false},
       {:ecto, "~> 3.7"},
-      {:ecto_sql, "3.13.2", only: :test},
+      {:ecto_sql, "== 3.13.3", only: :test},
       {:ex_doc, "0.38.4", only: :dev, runtime: false},
       {:excoveralls, "0.18.5", only: :test},
       {:stream_data, "1.2.0", only: [:dev, :test]}
