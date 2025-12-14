@@ -41,7 +41,7 @@ defmodule Nested.MixProject do
       {:phoenix, "1.7.21"},
       {:phoenix_ecto, "4.6.5"},
       {:phoenix_html, "4.2.1"},
-      {:phoenix_live_reload, "1.6.1", only: :dev},
+      {:phoenix_live_reload, "== 1.6.2", only: :dev},
       {:phoenix_live_view, "1.0.12"},
       {:plug_cowboy, "2.7.4"},
       {:postgrex, "0.20.0"},
