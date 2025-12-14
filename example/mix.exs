@@ -38,7 +38,7 @@ defmodule Nested.MixProject do
       {:floki, "== 0.38.0", only: :test},
       {:heroicons, "0.5.6"},
       {:jason, "1.4.4"},
-      {:phoenix, "1.7.21"},
+      {:phoenix, "== 1.8.3"},
       {:phoenix_ecto, "4.6.5"},
       {:phoenix_html, "4.2.1"},
       {:phoenix_live_reload, "1.6.2", only: :dev},
