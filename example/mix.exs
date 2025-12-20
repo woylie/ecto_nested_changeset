@@ -7,9 +7,11 @@ defmodule Nested.MixProject do
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
+      compilers: [:phoenix_live_view] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -36,13 +38,14 @@ defmodule Nested.MixProject do
       {:ecto_sql, "3.13.3"},
       {:esbuild, "0.10.0", runtime: Mix.env() == :dev},
       {:floki, "0.38.0", only: :test},
-      {:heroicons, "0.5.6"},
+      {:heroicons, "0.5.7"},
       {:jason, "1.4.4"},
+      {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix, "1.8.3"},
       {:phoenix_ecto, "4.7.0"},
       {:phoenix_html, "4.3.0"},
       {:phoenix_live_reload, "1.6.2", only: :dev},
-      {:phoenix_live_view, "1.0.12"},
+      {:phoenix_live_view, "1.1.19"},
       {:plug_cowboy, "2.7.5"},
       {:postgrex, "0.21.1"},
       {:tailwind, "0.4.1", runtime: Mix.env() == :dev}
