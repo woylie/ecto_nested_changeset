@@ -73,7 +73,7 @@ defmodule NestedWeb.OwnerLiveTest do
              |> has_element?()
 
       new_live
-      |> element(~s(a[phx-value-pet-index="1"]"), "add toy")
+      |> element("a[phx-value-pet-index='1']", "add toy")
       |> render_click()
 
       assert new_live
@@ -81,7 +81,7 @@ defmodule NestedWeb.OwnerLiveTest do
              |> has_element?()
 
       new_live
-      |> element(~s(a[phx-value-pet-index="0"]), "add toy")
+      |> element(~s(a[phx-value-pet-index='0']), "add toy")
       |> render_click()
 
       assert new_live
@@ -90,7 +90,7 @@ defmodule NestedWeb.OwnerLiveTest do
 
       new_live
       |> element(
-        ~s(a[phx-click="remove-pet"][phx-value-pet-index="0"]),
+        ~s(a[phx-click="remove-pet"][phx-value-pet-index='0']),
         "remove"
       )
       |> render_click()
@@ -113,7 +113,7 @@ defmodule NestedWeb.OwnerLiveTest do
 
       new_live
       |> element(
-        ~s(a[phx-click="remove-toy"][phx-value-pet-index="0"][phx-value-toy-index="0"]),
+        ~s(a[phx-click='remove-toy'][phx-value-pet-index='0'][phx-value-toy-index='0']),
         "remove"
       )
       |> render_click()
