@@ -35,7 +35,7 @@ defmodule Nested.MixProject do
   defp deps do
     [
       {:ecto_nested_changeset, path: ".."},
-      {:ecto_sql, "3.13.3"},
+      {:ecto_sql, "== 3.13.4"},
       {:esbuild, "0.10.0", runtime: Mix.env() == :dev},
       {:floki, "0.38.0", only: :test},
       {:heroicons, "0.5.7"},
