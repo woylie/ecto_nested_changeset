@@ -39,7 +39,7 @@ defmodule Nested.MixProject do
       {:esbuild, "0.10.0", runtime: Mix.env() == :dev},
       {:floki, "== 0.38.4", only: :test},
       {:heroicons, "0.5.7"},
-      {:jason, "1.4.4"},
+      {:jason, "== 1.4.5"},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix, "== 1.8.5"},
       {:phoenix_ecto, "4.7.0"},
