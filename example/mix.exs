@@ -35,20 +35,20 @@ defmodule Nested.MixProject do
   defp deps do
     [
       {:ecto_nested_changeset, path: ".."},
-      {:ecto_sql, "== 3.13.5"},
+      {:ecto_sql, "== 3.14.0"},
       {:esbuild, "0.10.0", runtime: Mix.env() == :dev},
       {:floki, "== 0.38.4", only: :test},
       {:heroicons, "0.5.7"},
       {:jason, "== 1.4.5"},
       {:lazy_html, ">= 0.1.0", only: :test},
-      {:phoenix, "== 1.8.5"},
+      {:phoenix, "== 1.8.9"},
       {:phoenix_ecto, "4.7.0"},
       {:phoenix_html, "4.3.0"},
       {:phoenix_live_reload, "1.6.2", only: :dev},
-      {:phoenix_live_view, "== 1.1.27"},
-      {:plug_cowboy, "== 2.8.0"},
-      {:postgrex, "== 0.22.0"},
-      {:tailwind, "0.4.1", runtime: Mix.env() == :dev}
+      {:phoenix_live_view, "== 1.2.6"},
+      {:plug_cowboy, "== 2.9.0"},
+      {:postgrex, "== 0.22.3"},
+      {:tailwind, "0.5.1", runtime: Mix.env() == :dev}
     ]
   end
 
