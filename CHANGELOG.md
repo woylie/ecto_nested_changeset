@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [1.0.1] - 2026-07-30
+
+### Changed
+
+- Add guards against negative indexes.
+
 ## [1.0.0] - 2025-02-23
 
 ### Changed
