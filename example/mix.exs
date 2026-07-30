@@ -34,6 +34,7 @@ defmodule Nested.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bandit, "~> 1.12.0"},
       {:ecto_nested_changeset, path: ".."},
       {:ecto_sql, "== 3.14.0"},
       {:esbuild, "0.10.0", runtime: Mix.env() == :dev},
@@ -44,9 +45,8 @@ defmodule Nested.MixProject do
       {:phoenix, "== 1.8.9"},
       {:phoenix_ecto, "4.7.0"},
       {:phoenix_html, "4.3.0"},
-      {:phoenix_live_reload, "1.6.2", only: :dev},
-      {:phoenix_live_view, "== 1.2.6"},
-      {:plug_cowboy, "== 2.9.0"},
+      {:phoenix_live_reload, "1.7.0", only: :dev},
+      {:phoenix_live_view, "== 1.2.8"},
       {:postgrex, "== 0.22.3"},
       {:tailwind, "0.5.1", runtime: Mix.env() == :dev}
     ]

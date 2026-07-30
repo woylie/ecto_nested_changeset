@@ -12,6 +12,7 @@ config :nested,
 
 # Configures the endpoint
 config :nested, NestedWeb.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
   render_errors: [
     formats: [html: NestedWeb.ErrorHTML, json: NestedWeb.ErrorJSON],
