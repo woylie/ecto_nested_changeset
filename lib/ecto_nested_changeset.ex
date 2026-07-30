@@ -277,12 +277,12 @@ defmodule EctoNestedChangeset do
   end
 
   defp nested_update(:insert, items, [index], value)
-       when is_list(items) and is_integer(index) do
+       when is_list(items) and is_integer(index) and index >= 0 do
     List.insert_at(items, index, value)
   end
 
   defp nested_update(:insert, %Changeset{} = changeset, [field, index], value)
-       when is_atom(field) and is_integer(index) do
+       when is_atom(field) and is_integer(index) and index >= 0 do
     new_value =
       case get_change_or_field(changeset, field) do
         %NotLoaded{} ->
@@ -311,12 +311,12 @@ defmodule EctoNestedChangeset do
   end
 
   defp nested_update(:update, items, [index], func)
-       when is_list(items) and is_integer(index) do
+       when is_list(items) and is_integer(index) and index >= 0 do
     List.update_at(items, index, &func.(&1))
   end
 
   defp nested_update(:delete, items, [index], mode)
-       when is_list(items) and is_integer(index) do
+       when is_list(items) and is_integer(index) and index >= 0 do
     case {Enum.at(items, index), mode} do
       {%Changeset{action: :insert}, _} ->
         List.delete_at(items, index)
@@ -364,7 +364,7 @@ defmodule EctoNestedChangeset do
   end
 
   defp nested_update(operation, items, [index | rest], value)
-       when is_list(items) and is_integer(index) do
+       when is_list(items) and is_integer(index) and index >= 0 do
     List.update_at(items, index, fn changeset_or_value ->
       nested_update(operation, changeset_or_value, rest, value)
     end)
@@ -381,7 +381,7 @@ defmodule EctoNestedChangeset do
   end
 
   defp nested_get(:get, items, [index])
-       when is_list(items) and is_integer(index) do
+       when is_list(items) and is_integer(index) and index >= 0 do
     Enum.at(items, index)
   end
 
@@ -398,7 +398,7 @@ defmodule EctoNestedChangeset do
   end
 
   defp nested_get(operation, items, [index | rest])
-       when is_list(items) and is_integer(index) do
+       when is_list(items) and is_integer(index) and index >= 0 do
     nested_value = Enum.at(items, index)
     nested_get(operation, nested_value, rest)
   end
