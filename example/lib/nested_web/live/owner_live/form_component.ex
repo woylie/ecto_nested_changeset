@@ -136,29 +136,41 @@ defmodule NestedWeb.OwnerLive.FormComponent do
   end
 
   def handle_event("add-toy", %{"pet-index" => index}, socket) do
-    index = String.to_integer(index)
+    source = socket.assigns.form.source
 
-    changeset =
-      EctoNestedChangeset.append_at(
-        socket.assigns.form.source,
-        [:pets, index, :toys],
-        %{}
-      )
+    case parse_index(index, count_at(source, [:pets])) do
+      {:ok, index} ->
+        changeset =
+          EctoNestedChangeset.append_at(
+            source,
+            [:pets, index, :toys],
+            %{}
+          )
 
-    {:noreply, assign_form(socket, changeset)}
+        {:noreply, assign_form(socket, changeset)}
+
+      :error ->
+        {:noreply, socket}
+    end
   end
 
   def handle_event("remove-pet", %{"pet-index" => index}, socket) do
-    index = String.to_integer(index)
+    source = socket.assigns.form.source
 
-    changeset =
-      EctoNestedChangeset.delete_at(
-        socket.assigns.form.source,
-        [:pets, index],
-        mode: {:flag, :delete}
-      )
+    case parse_index(index, count_at(source, [:pets])) do
+      {:ok, index} ->
+        changeset =
+          EctoNestedChangeset.delete_at(
+            source,
+            [:pets, index],
+            mode: {:flag, :delete}
+          )
 
-    {:noreply, assign_form(socket, changeset)}
+        {:noreply, assign_form(socket, changeset)}
+
+      :error ->
+        {:noreply, socket}
+    end
   end
 
   def handle_event(
@@ -166,17 +178,22 @@ defmodule NestedWeb.OwnerLive.FormComponent do
         %{"pet-index" => pet_index, "toy-index" => toy_index},
         socket
       ) do
-    pet_index = String.to_integer(pet_index)
-    toy_index = String.to_integer(toy_index)
+    source = socket.assigns.form.source
 
-    changeset =
-      EctoNestedChangeset.delete_at(
-        socket.assigns.form.source,
-        [:pets, pet_index, :toys, toy_index],
-        mode: {:flag, :delete}
-      )
+    with {:ok, pet_index} <- parse_index(pet_index, count_at(source, [:pets])),
+         toy_count = count_at(source, [:pets, pet_index, :toys]),
+         {:ok, toy_index} <- parse_index(toy_index, toy_count) do
+      changeset =
+        EctoNestedChangeset.delete_at(
+          source,
+          [:pets, pet_index, :toys, toy_index],
+          mode: {:flag, :delete}
+        )
 
-    {:noreply, assign_form(socket, changeset)}
+      {:noreply, assign_form(socket, changeset)}
+    else
+      :error -> {:noreply, socket}
+    end
   end
 
   defp save_owner(socket, :edit, owner_params) do
@@ -217,5 +234,19 @@ defmodule NestedWeb.OwnerLive.FormComponent do
 
   defp deleted?(form) do
     Form.normalize_value("checkbox", form[:delete].value)
+  end
+
+  defp parse_index(value, count) when is_binary(value) do
+    case Integer.parse(value) do
+      {index, ""} when index >= 0 and index < count -> {:ok, index}
+      _ -> :error
+    end
+  end
+
+  defp count_at(source, path) do
+    case EctoNestedChangeset.get_at(source, path) do
+      list when is_list(list) -> length(list)
+      _ -> 0
+    end
   end
 end
