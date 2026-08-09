@@ -33,7 +33,7 @@ defmodule EctoNestedChangeset do
   @spec append_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
   def append_at(%Changeset{} = changeset, path, value),
-    do: nested_update(:append, changeset, path, value)
+    do: nested_update(:append, changeset, validate_path!(path), value)
 
   @doc """
   Prepends a value to the field referenced by the path.
@@ -57,7 +57,7 @@ defmodule EctoNestedChangeset do
   @spec prepend_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
   def prepend_at(%Changeset{} = changeset, path, value),
-    do: nested_update(:prepend, changeset, path, value)
+    do: nested_update(:prepend, changeset, validate_path!(path), value)
 
   @doc """
   Inserts a value into a field at the given position.
@@ -91,7 +91,7 @@ defmodule EctoNestedChangeset do
   @spec insert_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
   def insert_at(%Changeset{} = changeset, path, value),
-    do: nested_update(:insert, changeset, path, value)
+    do: nested_update(:insert, changeset, validate_path!(path), value)
 
   @doc """
   Updates the value in the changeset at the given position with the given update
@@ -134,7 +134,7 @@ defmodule EctoNestedChangeset do
           (any -> any)
         ) :: Changeset.t()
   def update_at(%Changeset{} = changeset, path, func) when is_function(func, 1),
-    do: nested_update(:update, changeset, path, func)
+    do: nested_update(:update, changeset, validate_path!(path), func)
 
   @doc """
   Deletes the item at the given path.
@@ -209,7 +209,13 @@ defmodule EctoNestedChangeset do
   @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
           Changeset.t()
   def delete_at(%Changeset{} = changeset, path, opts \\ []),
-    do: nested_update(:delete, changeset, path, mode_from_opts!(opts))
+    do:
+      nested_update(
+        :delete,
+        changeset,
+        validate_path!(path),
+        mode_from_opts!(opts)
+      )
 
   @doc """
   Returns a value from a changeset referenced by the path.
@@ -223,8 +229,48 @@ defmodule EctoNestedChangeset do
   """
   @spec get_at(Changeset.t(), [atom | non_neg_integer] | atom) :: any()
   def get_at(%Changeset{} = changeset, path) do
-    nested_get(:get, changeset, path)
+    nested_get(:get, changeset, validate_path!(path))
   end
+
+  defp validate_path!(field) when is_atom(field), do: [field]
+
+  defp validate_path!([_ | _] = path) do
+    case Enum.find_index(path, &(not valid_segment?(&1))) do
+      nil ->
+        path
+
+      index ->
+        raise ArgumentError, """
+        invalid path segment passed to EctoNestedChangeset
+
+        Expected an atom for a field name, or a non-negative integer for a list
+        index.
+
+        Got, at position #{index}:
+
+            #{inspect(Enum.at(path, index))}
+        """
+    end
+  end
+
+  defp validate_path!(path) do
+    raise ArgumentError, """
+    invalid path passed to EctoNestedChangeset
+
+    Expected an atom, or a non-empty list of atoms and non-negative integers.
+
+    Got:
+
+        #{inspect(path)}
+    """
+  end
+
+  defp valid_segment?(segment) when is_atom(segment), do: true
+
+  defp valid_segment?(segment) when is_integer(segment) and segment >= 0,
+    do: true
+
+  defp valid_segment?(_segment), do: false
 
   defp mode_from_opts!(opts) do
     opts
@@ -254,9 +300,6 @@ defmodule EctoNestedChangeset do
         #{inspect(mode)}
     """
   end
-
-  defp nested_update(operation, changeset, field, value) when is_atom(field),
-    do: nested_update(operation, changeset, [field], value)
 
   defp nested_update(:append, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
@@ -373,9 +416,6 @@ defmodule EctoNestedChangeset do
       nested_update(operation, changeset_or_value, rest, value)
     end)
   end
-
-  defp nested_get(operation, changeset, field) when is_atom(field),
-    do: nested_get(operation, changeset, [field])
 
   defp nested_get(:get, %Changeset{} = changeset, [field])
        when is_atom(field) do

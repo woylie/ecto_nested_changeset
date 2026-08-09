@@ -39,6 +39,71 @@ defmodule EctoNestedChangesetTest do
 
   defp persisted(struct), do: Ecto.put_meta(struct, state: :loaded)
 
+  defp path_callers(changeset) do
+    [
+      &append_at(changeset, &1, %Post{}),
+      &prepend_at(changeset, &1, %Post{}),
+      &insert_at(changeset, &1, %Post{}),
+      &update_at(changeset, &1, fn value -> value end),
+      &delete_at(changeset, &1),
+      &get_at(changeset, &1)
+    ]
+  end
+
+  describe "path validation" do
+    setup do
+      %{
+        changeset: change(%Category{id: 1, posts: [%Post{id: 1, title: "one"}]})
+      }
+    end
+
+    test "rejects an empty path", %{changeset: changeset} do
+      for call <- path_callers(changeset) do
+        assert_raise ArgumentError, ~r/invalid path passed/, fn -> call.([]) end
+      end
+    end
+
+    test "rejects a path that is neither an atom nor a list", %{
+      changeset: changeset
+    } do
+      for call <- path_callers(changeset) do
+        assert_raise ArgumentError, ~r/invalid path passed/, fn ->
+          call.("posts")
+        end
+      end
+    end
+
+    test "rejects a segment that is not an atom or an integer", %{
+      changeset: changeset
+    } do
+      for call <- path_callers(changeset) do
+        assert_raise ArgumentError, ~r/invalid path segment/, fn ->
+          call.([:posts, "0"])
+        end
+      end
+    end
+
+    test "rejects a negative index", %{changeset: changeset} do
+      for call <- path_callers(changeset) do
+        assert_raise ArgumentError, ~r/invalid path segment/, fn ->
+          call.([:posts, -1])
+        end
+      end
+    end
+
+    test "names the offending segment and its position", %{
+      changeset: changeset
+    } do
+      message =
+        assert_raise ArgumentError, fn ->
+          get_at(changeset, [:posts, 0, -1, :title])
+        end
+
+      assert Exception.message(message) =~ "at position 2"
+      assert Exception.message(message) =~ "-1"
+    end
+  end
+
   describe "append_at/3" do
     test "appends item at a root level field without data" do
       changeset =
