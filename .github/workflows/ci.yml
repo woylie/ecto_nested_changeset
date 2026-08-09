@@ -12,14 +12,24 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test_coverage:
     runs-on: ubuntu-24.04
     name: Test Coverage
+    timeout-minutes: 15
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         id: beam
         with:
@@ -40,10 +50,11 @@ jobs:
           mix deps.get
       - name: Run Tests
         run: mix coveralls.github --warnings-as-errors
-        
+
   tests:
     runs-on: ubuntu-24.04
     name: OTP ${{matrix.otp}} / Elixir ${{matrix.elixir}}
+    timeout-minutes: 15
     strategy:
       matrix:
         include:
@@ -62,11 +73,11 @@ jobs:
           - { elixir: "1.20", otp: 27 }
           - { elixir: "1.20", otp: 28 }
           - { elixir: "1.20", otp: 29 }
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         id: beam
         with:
@@ -86,28 +97,23 @@ jobs:
           mix local.hex --force
           mix deps.get
       - name: Run Tests
-        run: mix test
+        run: mix test --warnings-as-errors
 
   matrix-results:
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     name: Tests
+    timeout-minutes: 5
     needs:
       - tests
     steps:
-      - run: |
-          result="${{ needs.tests.result }}"
-          if [[ $result == "success" ]]; then
-            exit 0
-          else
-            exit 1
-          fi
+      - if: ${{ needs.tests.result != 'success' }}
+        run: exit 1
 
   example-tests:
     runs-on: ubuntu-24.04
     name: Example application tests
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: example
@@ -128,6 +134,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         id: beam
         with:
@@ -152,11 +160,12 @@ jobs:
   code-quality:
     runs-on: ubuntu-24.04
     name: Code Quality
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         id: beam
         with:
@@ -195,6 +204,6 @@ jobs:
       - name: Run Hex Audit
         run: mix hex.audit
       - name: Generate docs
-        run: mix docs
+        run: mix docs --warnings-as-errors
       - name: Run Dialyzer
         run: mix dialyzer
