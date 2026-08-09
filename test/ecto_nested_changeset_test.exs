@@ -37,6 +37,8 @@ defmodule EctoNestedChangesetTest do
     end
   end
 
+  defp persisted(struct), do: Ecto.put_meta(struct, state: :loaded)
+
   describe "append_at/3" do
     test "appends item at a root level field without data" do
       changeset =
@@ -68,6 +70,33 @@ defmodule EctoNestedChangesetTest do
                      |> change()
                      |> append_at(:posts, %Post{title: "first"})
                    end
+    end
+
+    test "raises error if nested field of persisted resource is not preloaded" do
+      assert_raise EctoNestedChangeset.NotLoadedError,
+                   "field `:comments` is not loaded",
+                   fn ->
+                     %Category{id: 1, posts: [persisted(%Post{id: 1})]}
+                     |> change()
+                     |> append_at([:posts, 0, :comments], %Comment{})
+                   end
+    end
+
+    test "doesn't raise error if nested field of unpersisted resource is not loaded" do
+      changeset =
+        %Category{id: 1, posts: [%Post{id: 1}]}
+        |> change()
+        |> append_at([:posts, 0, :comments], %Comment{})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   changes: %{
+                     comments: [%Ecto.Changeset{data: %Comment{}}]
+                   }
+                 }
+               ]
+             } = changeset.changes
     end
 
     test "appends item at a sub field of a new list item" do
@@ -221,6 +250,33 @@ defmodule EctoNestedChangesetTest do
                      |> change()
                      |> prepend_at(:posts, %Post{title: "first"})
                    end
+    end
+
+    test "raises error if nested field of persisted resource is not preloaded" do
+      assert_raise EctoNestedChangeset.NotLoadedError,
+                   "field `:comments` is not loaded",
+                   fn ->
+                     %Category{id: 1, posts: [persisted(%Post{id: 1})]}
+                     |> change()
+                     |> prepend_at([:posts, 0, :comments], %Comment{})
+                   end
+    end
+
+    test "doesn't raise error if nested field of unpersisted resource is not loaded" do
+      changeset =
+        %Category{id: 1, posts: [%Post{id: 1}]}
+        |> change()
+        |> prepend_at([:posts, 0, :comments], %Comment{})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   changes: %{
+                     comments: [%Ecto.Changeset{data: %Comment{}}]
+                   }
+                 }
+               ]
+             } = changeset.changes
     end
 
     test "prepends item at a sub field of a new list item" do
@@ -382,6 +438,33 @@ defmodule EctoNestedChangesetTest do
                      |> change()
                      |> insert_at([:posts, 0], %Post{title: "first"})
                    end
+    end
+
+    test "raises error if nested field of persisted resource is not preloaded" do
+      assert_raise EctoNestedChangeset.NotLoadedError,
+                   "field `:comments` is not loaded",
+                   fn ->
+                     %Category{id: 1, posts: [persisted(%Post{id: 1})]}
+                     |> change()
+                     |> insert_at([:posts, 0, :comments, 0], %Comment{})
+                   end
+    end
+
+    test "doesn't raise error if nested field of unpersisted resource is not loaded" do
+      changeset =
+        %Category{id: 1, posts: [%Post{id: 1}]}
+        |> change()
+        |> insert_at([:posts, 0, :comments, 0], %Comment{})
+
+      assert %{
+               posts: [
+                 %Ecto.Changeset{
+                   changes: %{
+                     comments: [%Ecto.Changeset{data: %Comment{}}]
+                   }
+                 }
+               ]
+             } = changeset.changes
     end
 
     test "inserts item at a sub field of a new list item" do
@@ -565,6 +648,16 @@ defmodule EctoNestedChangesetTest do
                  }
                ]
              } = changeset.changes
+    end
+
+    test "raises error if nested field of persisted resource is not preloaded" do
+      assert_raise EctoNestedChangeset.NotLoadedError,
+                   "field `:comments` is not loaded",
+                   fn ->
+                     %Category{id: 1, posts: [persisted(%Post{id: 1})]}
+                     |> change()
+                     |> update_at([:posts, 0, :comments], &Enum.reverse/1)
+                   end
     end
 
     test "updates a list field" do
@@ -932,10 +1025,51 @@ defmodule EctoNestedChangesetTest do
       assert get_at(changeset, :posts) == get_at(changeset, [:posts])
     end
 
-    test "doesn't raise error if resource field is not loaded" do
-      %Category{id: 1}
-      |> change()
-      |> get_at([:posts])
+    test "returns an empty list if field of unpersisted resource is not loaded" do
+      field =
+        %Category{id: 1}
+        |> change()
+        |> get_at([:posts])
+
+      assert field == []
+    end
+
+    test "returns nil if field of persisted resource is not preloaded" do
+      field =
+        %Category{id: 1}
+        |> persisted()
+        |> change()
+        |> get_at([:posts])
+
+      assert field == nil
+    end
+
+    test "returns nil below a field of a persisted resource that is not preloaded" do
+      field =
+        %Category{id: 1}
+        |> persisted()
+        |> change()
+        |> get_at([:posts, 0])
+
+      assert field == nil
+    end
+
+    test "returns nil if nested resource field is not loaded" do
+      field =
+        %Category{id: 1, posts: [persisted(%Post{id: 1})]}
+        |> change()
+        |> get_at([:posts, 0, :comments])
+
+      assert field == nil
+    end
+
+    test "returns nil below a nested field that is not loaded" do
+      field =
+        %Category{id: 1, posts: [persisted(%Post{id: 1})]}
+        |> change()
+        |> get_at([:posts, 0, :comments, 0, :body])
+
+      assert field == nil
     end
   end
 end
