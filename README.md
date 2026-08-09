@@ -12,10 +12,14 @@ Add `ecto_nested_changeset` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ecto_nested_changeset, "~> 1.0.1"}
+    {:ecto_nested_changeset, "~> 1.0"}
   ]
 end
 ```
+
+This package is tested against the Elixir and OTP versions that are still
+supported upstream. Older versions down to the requirement in `mix.exs` may
+still work, but they are not covered by CI and not officially supported.
 
 ## Usage
 
@@ -69,6 +73,17 @@ category
   ]
 }
 ```
+
+## Alternatives
+
+Since Ecto 3.10, `Ecto.Changeset.cast_assoc/3` and `Ecto.Changeset.cast_embed/3`
+take `:sort_param` and `:drop_param`, which add, remove and reorder items from
+the form parameters while casting. If that is all you need, you should prefer
+those functions.
+
+This library works on a changeset that already exists, rather than on the
+parameters one is built from. It covers array fields and the cases where you are
+not casting parameters at all.
 
 ## Example application
 

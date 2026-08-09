@@ -21,6 +21,7 @@ defmodule EctoNestedChangesetTest do
     use Ecto.Schema
 
     schema "comments" do
+      field :body, :string
       belongs_to :post, EctoNestedChangesetTest.Post
     end
   end
@@ -36,6 +37,8 @@ defmodule EctoNestedChangesetTest do
       has_many :comments, EctoNestedChangesetTest.Comment
     end
   end
+
+  doctest EctoNestedChangeset
 
   defp persisted(struct), do: Ecto.put_meta(struct, state: :loaded)
 
@@ -1005,6 +1008,23 @@ defmodule EctoNestedChangesetTest do
                    },
                    data: %Post{}
                  }
+               ]
+             } = changeset.changes
+    end
+
+    test "wraps an unpersisted struct that is part of the data" do
+      changeset =
+        %Category{
+          id: 1,
+          posts: [%Post{id: 1, title: "one"}, %Post{title: "unpersisted"}]
+        }
+        |> change()
+        |> delete_at([:posts, 1], mode: {:action, :delete})
+
+      assert %{
+               posts: [
+                 %Changeset{action: :update, data: %Post{id: 1}},
+                 %Changeset{action: :delete, data: %Post{title: "unpersisted"}}
                ]
              } = changeset.changes
     end
