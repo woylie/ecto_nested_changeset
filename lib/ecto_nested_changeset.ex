@@ -11,6 +11,18 @@ defmodule EctoNestedChangeset do
   alias Ecto.Association.NotLoaded
   alias Ecto.Changeset
 
+  @typedoc """
+  Points at a field or a list item within a changeset.
+
+  A path is a list of atoms for field names and non-negative integers for
+  indexes in lists. A bare atom is a shorthand for a single-segment path.
+
+      [:posts, 0, :comments]
+      :posts
+  """
+  @typedoc since: "1.1.0"
+  @type path :: [atom | non_neg_integer] | atom
+
   @doc """
   Appends a value to the field referenced by the path.
 
@@ -30,8 +42,7 @@ defmodule EctoNestedChangeset do
         ]
       }
   """
-  @spec append_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
-          Changeset.t()
+  @spec append_at(Changeset.t(), path, any) :: Changeset.t()
   def append_at(%Changeset{} = changeset, path, value) do
     path = validate_path!(path)
     %Changeset{} = nested_update(:append, changeset, path, value)
@@ -56,8 +67,7 @@ defmodule EctoNestedChangeset do
         ]
       }
   """
-  @spec prepend_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
-          Changeset.t()
+  @spec prepend_at(Changeset.t(), path, any) :: Changeset.t()
   def prepend_at(%Changeset{} = changeset, path, value) do
     path = validate_path!(path)
     %Changeset{} = nested_update(:prepend, changeset, path, value)
@@ -92,8 +102,7 @@ defmodule EctoNestedChangeset do
         ]
       }
   """
-  @spec insert_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
-          Changeset.t()
+  @spec insert_at(Changeset.t(), path, any) :: Changeset.t()
   def insert_at(%Changeset{} = changeset, path, value) do
     path = validate_path!(path)
     %Changeset{} = nested_update(:insert, changeset, path, value)
@@ -134,11 +143,7 @@ defmodule EctoNestedChangeset do
         ]
       }
   """
-  @spec update_at(
-          Changeset.t(),
-          [atom | non_neg_integer] | atom,
-          (any -> any)
-        ) :: Changeset.t()
+  @spec update_at(Changeset.t(), path, (any -> any)) :: Changeset.t()
   def update_at(%Changeset{} = changeset, path, func)
       when is_function(func, 1) do
     path = validate_path!(path)
@@ -215,8 +220,7 @@ defmodule EctoNestedChangeset do
         ]
       }
   """
-  @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
-          Changeset.t()
+  @spec delete_at(Changeset.t(), path, keyword) :: Changeset.t()
   def delete_at(%Changeset{} = changeset, path, opts \\ []) do
     path = validate_path!(path)
     mode = mode_from_opts!(opts)
@@ -233,7 +237,7 @@ defmodule EctoNestedChangeset do
       ...> |> get_at(changeset, [:pets, 1, :toys])
       [%Toy{name: "stick"}, %Toy{name: "ball"}]
   """
-  @spec get_at(Changeset.t(), [atom | non_neg_integer] | atom) :: any()
+  @spec get_at(Changeset.t(), path) :: any()
   def get_at(%Changeset{} = changeset, path) do
     nested_get(:get, changeset, validate_path!(path))
   end
