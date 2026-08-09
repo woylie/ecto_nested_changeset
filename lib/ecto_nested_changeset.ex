@@ -1,9 +1,52 @@
 defmodule EctoNestedChangeset do
   @moduledoc """
-  This module defines function for manipulating nested changesets.
+  This module defines functions for manipulating nested changesets.
 
   All functions take a path as the second argument. The path is a list of atoms
-  (for field names) and integers (for indexes in lists).
+  (for field names) and non-negative integers (for indexes in lists). A bare
+  atom is accepted as a shorthand for a single-segment path. Every function
+  validates the path and raises an `ArgumentError` naming the offending segment
+  and its position if it is empty or holds anything else.
+
+  `append_at/3`, `prepend_at/3`, `insert_at/3` and `update_at/3` raise
+  `EctoNestedChangeset.NotLoadedError` if the path passes through a relation
+  field that is not loaded on a struct that is already persisted, at any depth.
+  If the struct was never persisted, the relation reads as an empty list
+  instead, since there is nothing to preload yet. `get_at/2` does not raise: it
+  returns `nil` for a relation that is not loaded.
+
+  ## Schemas used in the examples
+
+  The examples in this module operate on these schemas.
+
+      defmodule Category do
+        use Ecto.Schema
+
+        schema "categories" do
+          has_many :posts, Post, on_replace: :delete
+        end
+      end
+
+      defmodule Post do
+        use Ecto.Schema
+
+        schema "posts" do
+          field :delete, :boolean, virtual: true, default: false
+          field :title, :string
+          field :tags, {:array, :string}, default: []
+          belongs_to :category, Category
+          has_many :comments, Comment
+        end
+      end
+
+      defmodule Comment do
+        use Ecto.Schema
+
+        schema "comments" do
+          field :body, :string
+          belongs_to :post, Post
+        end
+      end
   """
 
   import Ecto.Changeset
@@ -31,17 +74,20 @@ defmodule EctoNestedChangeset do
 
   ## Example
 
-      iex> %Owner{pets: [%Pet{}, %Pet{toys: [%Toy{name: "stick"}]}]}
+      iex> %Category{
+      ...>   posts: [
+      ...>     %Post{id: 1, title: "first", comments: []},
+      ...>     %Post{id: 2, title: "second", comments: [%Comment{body: "one"}]}
+      ...>   ]
+      ...> }
       ...> |> Ecto.Changeset.change()
-      ...> |> append_at(changeset, [:pets, 1, :toys], %Toy{name: "ball"})
+      ...> |> append_at([:posts, 1, :comments], %Comment{body: "two"})
       ...> |> Ecto.Changeset.apply_changes()
-      %Owner{
-        pets: [
-          %Pet{},
-          %Pet{toys: [%Toy{name: "stick"}, %Toy{name: "ball"}]}
-        ]
-      }
+      ...> |> Map.fetch!(:posts)
+      ...> |> Enum.map(fn post -> Enum.map(post.comments, & &1.body) end)
+      [[], ["one", "two"]]
   """
+  @doc since: "0.1.0"
   @spec append_at(Changeset.t(), path, any) :: Changeset.t()
   def append_at(%Changeset{} = changeset, path, value) do
     path = validate_path!(path)
@@ -56,17 +102,20 @@ defmodule EctoNestedChangeset do
 
   ## Example
 
-      iex> %Owner{pets: [%Pet{}, %Pet{toys: [%Toy{name: "stick"}]}]}
+      iex> %Category{
+      ...>   posts: [
+      ...>     %Post{id: 1, title: "first", comments: []},
+      ...>     %Post{id: 2, title: "second", comments: [%Comment{body: "one"}]}
+      ...>   ]
+      ...> }
       ...> |> Ecto.Changeset.change()
-      ...> |> prepend_at(changeset, [:pets, 1, :toys], %Toy{name: "ball"})
+      ...> |> prepend_at([:posts, 1, :comments], %Comment{body: "two"})
       ...> |> Ecto.Changeset.apply_changes()
-      %Owner{
-        pets: [
-          %Pet{},
-          %Pet{toys: [%Toy{name: "ball"}, %Toy{name: "stick"}]}
-        ]
-      }
+      ...> |> Map.fetch!(:posts)
+      ...> |> Enum.map(fn post -> Enum.map(post.comments, & &1.body) end)
+      [[], ["two", "one"]]
   """
+  @doc since: "0.1.0"
   @spec prepend_at(Changeset.t(), path, any) :: Changeset.t()
   def prepend_at(%Changeset{} = changeset, path, value) do
     path = validate_path!(path)
@@ -80,28 +129,20 @@ defmodule EctoNestedChangeset do
 
   ## Example
 
-      iex> %Owner{
-      ...>   pets: [
-      ...>     %Pet{},
-      ...>     %Pet{toys: [%Toy{name: "stick"}, %Toy{name: "ball"}]}
+      iex> %Category{
+      ...>   posts: [
+      ...>     %Post{id: 1, title: "first"},
+      ...>     %Post{id: 2, title: "third"}
       ...>   ]
       ...> }
       ...> |> Ecto.Changeset.change()
-      ...> |> insert_at(changeset, [:pets, 1, :toys, 1], %Toy{name: "rope"})
+      ...> |> insert_at([:posts, 1], %Post{title: "second"})
       ...> |> Ecto.Changeset.apply_changes()
-      %Owner{
-        pets: [
-          %Pet{},
-          %Pet{
-            toys: [
-              %Toy{name: "ball"},
-              %Toy{name: "rope"},
-              %Toy{name: "stick"}
-            ]
-          }
-        ]
-      }
+      ...> |> Map.fetch!(:posts)
+      ...> |> Enum.map(& &1.title)
+      ["first", "second", "third"]
   """
+  @doc since: "0.1.0"
   @spec insert_at(Changeset.t(), path, any) :: Changeset.t()
   def insert_at(%Changeset{} = changeset, path, value) do
     path = validate_path!(path)
@@ -121,28 +162,22 @@ defmodule EctoNestedChangeset do
   of a *-to-many relation, the list values will not be unwrapped, which means
   that the update function has to handle a list of changesets.
 
-  ## Examples
+  ## Example
 
-      iex> %Owner{pets: [%Pet{toys: [%Toy{name: "stick"}, %Toy{name: "ball"}]}]}
+      iex> %Category{
+      ...>   posts: [
+      ...>     %Post{id: 1, title: "first"},
+      ...>     %Post{id: 2, title: "second"}
+      ...>   ]
+      ...> }
       ...> |> Ecto.Changeset.change()
-      ...> |> update_at(
-      ...>      changeset,
-      ...>      [:pets, 1, :toys, 1, :name],
-      ...>      &String.upcase/1
-      ...>    )
+      ...> |> update_at([:posts, 1, :title], &String.upcase/1)
       ...> |> Ecto.Changeset.apply_changes()
-      %Owner{
-        pets: [
-          %Pet{},
-          %Pet{
-            toys: [
-              %Toy{name: "stick"},
-              %Toy{name: "BALL"}
-            ]
-          }
-        ]
-      }
+      ...> |> Map.fetch!(:posts)
+      ...> |> Enum.map(& &1.title)
+      ["first", "SECOND"]
   """
+  @doc since: "0.1.0"
   @spec update_at(Changeset.t(), path, (any -> any)) :: Changeset.t()
   def update_at(%Changeset{} = changeset, path, func)
       when is_function(func, 1) do
@@ -155,8 +190,9 @@ defmodule EctoNestedChangeset do
 
   The last path segment is expected to be an integer index.
 
-  Items that are not persisted in the database yet will always be removed from
-  the list. For structs that are already persisted in the database, there are
+  Items added with `append_at/3`, `prepend_at/3` or `insert_at/3` and not
+  persisted in the database yet will always be removed from the list, whatever
+  the mode. For structs that are already persisted in the database, there are
   three different modes.
 
   - `[mode: {:action, :replace}]` (default) - The item will be wrapped in a
@@ -166,7 +202,15 @@ defmodule EctoNestedChangeset do
     the action set to `:delete`.
   - `[mode: {:flag, field}]` - Puts `true` as a change for the given field.
 
-  The flag option useful for explicitly marking items for deletion in form
+  An unpersisted struct that the caller put into the parent's `:data` rather
+  than its `:changes` is neither of those cases. It is treated like a persisted
+  struct, and `c:Ecto.Repo.update/2` then raises
+  `Ecto.NoPrimaryKeyValueError`. Removing it from the list instead would not
+  help, since Ecto reconciles the relation against `:data` and tries to delete
+  it there. Add unpersisted items with `append_at/3`, `prepend_at/3` or
+  `insert_at/3`, so that they end up in the changes.
+
+  The flag option is useful for explicitly marking items for deletion in form
   parameters. In this case, you would configure a virtual field on the schema
   and set the changeset action to `:delete` in the changeset function in case
   the value is set to `true`.
@@ -189,37 +233,37 @@ defmodule EctoNestedChangeset do
           else: changeset
       end
 
+  An unknown option key or an unknown `:mode` value raises an `ArgumentError`.
+
   ## Examples
 
-      iex> changeset = Ecto.Changeset.change(
-             %Owner{pets: [%Pet{name: "George"}, %Pet{name: "Patty"}]}
-      ...> )
-      iex> delete_at(changeset, [:pets, 1])
-      %Ecto.Changeset{
-        changes: [
-          %Changeset{action: :replace, data: %Post{name: "Patty"}},
-          %Changeset{action: :update, data: %Post{name: "George"}},
-        ]
-      }
-      iex> delete_at(changeset, [:pets, 1], mode: {:action, :delete})
-      %Ecto.Changeset{
-        changes: [
-          %Changeset{action: :update, data: %Post{name: "George"}},
-          %Changeset{action: :delete, data: %Post{name: "Patty"}},
-        ]
-      }
-      iex> delete_at(changeset, [:pets, 1], mode: {:field, :delete})
-      %Ecto.Changeset{
-        changes: [
-          %Changeset{action: :update, data: %Post{name: "George"}},
-          %Changeset{
-            action: :update,
-            changes: %{delete: true},
-            data: %Post{name: "Patty"}
-          },
-        ]
-      }
+      iex> changeset =
+      ...>   Ecto.Changeset.change(%Category{
+      ...>     posts: [
+      ...>       %Post{id: 1, title: "first"},
+      ...>       %Post{id: 2, title: "second"}
+      ...>     ]
+      ...>   })
+      iex> changeset
+      ...> |> delete_at([:posts, 1])
+      ...> |> Map.fetch!(:changes)
+      ...> |> Map.fetch!(:posts)
+      ...> |> Enum.map(&{&1.action, &1.data.title})
+      [replace: "second", update: "first"]
+      iex> changeset
+      ...> |> delete_at([:posts, 1], mode: {:action, :delete})
+      ...> |> Map.fetch!(:changes)
+      ...> |> Map.fetch!(:posts)
+      ...> |> Enum.map(&{&1.action, &1.data.title})
+      [update: "first", delete: "second"]
+      iex> changeset
+      ...> |> delete_at([:posts, 1], mode: {:flag, :delete})
+      ...> |> Map.fetch!(:changes)
+      ...> |> Map.fetch!(:posts)
+      ...> |> Enum.map(&{&1.data.title, &1.changes})
+      [{"first", %{}}, {"second", %{delete: true}}]
   """
+  @doc since: "0.1.0"
   @spec delete_at(Changeset.t(), path, keyword) :: Changeset.t()
   def delete_at(%Changeset{} = changeset, path, opts \\ []) do
     path = validate_path!(path)
@@ -232,11 +276,14 @@ defmodule EctoNestedChangeset do
 
   ## Example
 
-      iex> %Owner{pets: [%Pet{}, %Pet{toys: [%Toy{name: "stick"}]}]}
+      iex> %Category{
+      ...>   posts: [%Post{title: "first"}, %Post{title: "second"}]
+      ...> }
       ...> |> Ecto.Changeset.change()
-      ...> |> get_at(changeset, [:pets, 1, :toys])
-      [%Toy{name: "stick"}, %Toy{name: "ball"}]
+      ...> |> get_at([:posts, 1, :title])
+      "second"
   """
+  @doc since: "0.2.0"
   @spec get_at(Changeset.t(), path) :: any()
   def get_at(%Changeset{} = changeset, path) do
     nested_get(:get, changeset, validate_path!(path))
