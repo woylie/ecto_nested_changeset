@@ -370,6 +370,9 @@ defmodule EctoNestedChangeset do
     end)
   end
 
+  defp nested_get(operation, changeset, field) when is_atom(field),
+    do: nested_get(operation, changeset, [field])
+
   defp nested_get(:get, %Changeset{} = changeset, [field])
        when is_atom(field) do
     Changeset.get_field(changeset, field)
