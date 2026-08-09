@@ -260,47 +260,31 @@ defmodule EctoNestedChangeset do
 
   defp nested_update(:append, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
-    new_value =
-      case get_change_or_field(changeset, field) do
-        %NotLoaded{} ->
-          if Ecto.get_meta(changeset.data, :state) == :built,
-            do: [value],
-            else: raise(EctoNestedChangeset.NotLoadedError, field: field)
-
-        previous_value ->
-          previous_value ++ [value]
-      end
-
-    Changeset.put_change(changeset, field, new_value)
+    Changeset.put_change(
+      changeset,
+      field,
+      fetch_loaded!(changeset, field) ++ [value]
+    )
   end
 
   defp nested_update(:append, %{} = data, [field], value) when is_atom(field) do
     data
     |> Changeset.change()
-    |> Changeset.put_change(field, Map.fetch!(data, field) ++ [value])
+    |> Changeset.put_change(field, fetch_loaded!(data, field) ++ [value])
   end
 
   defp nested_update(:prepend, %Changeset{} = changeset, [field], value)
        when is_atom(field) do
-    new_value =
-      case get_change_or_field(changeset, field) do
-        %NotLoaded{} ->
-          if Ecto.get_meta(changeset.data, :state) == :built,
-            do: [value],
-            else: raise(EctoNestedChangeset.NotLoadedError, field: field)
-
-        previous_value ->
-          [value | previous_value]
-      end
-
-    Changeset.put_change(changeset, field, new_value)
+    Changeset.put_change(changeset, field, [
+      value | fetch_loaded!(changeset, field)
+    ])
   end
 
   defp nested_update(:prepend, %{} = data, [field], value)
        when is_atom(field) do
     data
     |> Changeset.change()
-    |> Changeset.put_change(field, [value | Map.fetch!(data, field)])
+    |> Changeset.put_change(field, [value | fetch_loaded!(data, field)])
   end
 
   defp nested_update(:insert, items, [index], value)
@@ -310,31 +294,24 @@ defmodule EctoNestedChangeset do
 
   defp nested_update(:insert, %Changeset{} = changeset, [field, index], value)
        when is_atom(field) and is_integer(index) and index >= 0 do
-    new_value =
-      case get_change_or_field(changeset, field) do
-        %NotLoaded{} ->
-          if Ecto.get_meta(changeset.data, :state) == :built,
-            do: [value],
-            else: raise(EctoNestedChangeset.NotLoadedError, field: field)
-
-        previous_value ->
-          List.insert_at(previous_value, index, value)
-      end
-
+    new_value = List.insert_at(fetch_loaded!(changeset, field), index, value)
     Changeset.put_change(changeset, field, new_value)
   end
 
   defp nested_update(:update, %Changeset{} = changeset, [field], func)
        when is_atom(field) do
-    value = get_change_or_field(changeset, field)
-    Changeset.put_change(changeset, field, func.(value))
+    Changeset.put_change(
+      changeset,
+      field,
+      func.(fetch_loaded!(changeset, field))
+    )
   end
 
   defp nested_update(:update, %{} = data, [field], func)
        when is_atom(field) do
     data
     |> Changeset.change()
-    |> Changeset.put_change(field, func.(Map.fetch!(data, field)))
+    |> Changeset.put_change(field, func.(fetch_loaded!(data, field)))
   end
 
   defp nested_update(:update, items, [index], func)
@@ -372,7 +349,7 @@ defmodule EctoNestedChangeset do
 
   defp nested_update(operation, %Changeset{} = changeset, [field | rest], value)
        when is_atom(field) do
-    nested_value = get_change_or_field(changeset, field)
+    nested_value = fetch_loaded!(changeset, field)
 
     Changeset.put_change(
       changeset,
@@ -383,7 +360,7 @@ defmodule EctoNestedChangeset do
 
   defp nested_update(operation, %{} = data, [field | rest], value)
        when is_atom(field) do
-    nested_value = Map.get(data, field)
+    nested_value = fetch_loaded!(data, field)
 
     data
     |> change()
@@ -402,12 +379,14 @@ defmodule EctoNestedChangeset do
 
   defp nested_get(:get, %Changeset{} = changeset, [field])
        when is_atom(field) do
-    Changeset.get_field(changeset, field)
+    if unloaded?(get_change_or_field(changeset, field), changeset.data),
+      do: nil,
+      else: Changeset.get_field(changeset, field)
   end
 
   defp nested_get(:get, %{} = data, [field])
        when is_atom(field) do
-    Map.get(data, field)
+    data |> Map.get(field) |> nilify_not_loaded()
   end
 
   defp nested_get(:get, items, [index])
@@ -417,14 +396,18 @@ defmodule EctoNestedChangeset do
 
   defp nested_get(operation, %Changeset{} = changeset, [field | rest])
        when is_atom(field) do
-    nested_value = get_change_or_field(changeset, field)
-    nested_get(operation, nested_value, rest)
+    case get_change_or_field(changeset, field) do
+      %NotLoaded{} -> nil
+      nested_value -> nested_get(operation, nested_value, rest)
+    end
   end
 
   defp nested_get(operation, %{} = data, [field | rest])
        when is_atom(field) do
-    nested_value = Map.get(data, field)
-    nested_get(operation, nested_value, rest)
+    case Map.get(data, field) do
+      %NotLoaded{} -> nil
+      nested_value -> nested_get(operation, nested_value, rest)
+    end
   end
 
   defp nested_get(operation, items, [index | rest])
@@ -439,4 +422,30 @@ defmodule EctoNestedChangeset do
       :error -> Map.get(changeset.data, field)
     end
   end
+
+  defp fetch_loaded!(%Changeset{} = changeset, field) do
+    changeset
+    |> get_change_or_field(field)
+    |> loaded!(changeset.data, field)
+  end
+
+  defp fetch_loaded!(%{} = data, field) do
+    data
+    |> Map.fetch!(field)
+    |> loaded!(data, field)
+  end
+
+  defp loaded!(%NotLoaded{}, data, field) do
+    if Ecto.get_meta(data, :state) == :built,
+      do: [],
+      else: raise(EctoNestedChangeset.NotLoadedError, field: field)
+  end
+
+  defp loaded!(value, _data, _field), do: value
+
+  defp nilify_not_loaded(%NotLoaded{}), do: nil
+  defp nilify_not_loaded(value), do: value
+
+  defp unloaded?(%NotLoaded{}, data), do: Ecto.get_meta(data, :state) != :built
+  defp unloaded?(_value, _data), do: false
 end
