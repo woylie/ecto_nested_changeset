@@ -208,10 +208,8 @@ defmodule EctoNestedChangeset do
   """
   @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
           Changeset.t()
-  def delete_at(%Changeset{} = changeset, path, opts \\ []) do
-    mode = opts[:mode] || {:action, :replace}
-    nested_update(:delete, changeset, path, mode)
-  end
+  def delete_at(%Changeset{} = changeset, path, opts \\ []),
+    do: nested_update(:delete, changeset, path, mode_from_opts!(opts))
 
   @doc """
   Returns a value from a changeset referenced by the path.
@@ -226,6 +224,35 @@ defmodule EctoNestedChangeset do
   @spec get_at(Changeset.t(), [atom | non_neg_integer] | atom) :: any()
   def get_at(%Changeset{} = changeset, path) do
     nested_get(:get, changeset, path)
+  end
+
+  defp mode_from_opts!(opts) do
+    opts
+    |> Keyword.validate!(mode: {:action, :replace})
+    |> Keyword.fetch!(:mode)
+    |> validate_mode!()
+  end
+
+  defp validate_mode!({:action, action} = mode)
+       when action in [:replace, :delete],
+       do: mode
+
+  defp validate_mode!({:flag, field} = mode) when is_atom(field), do: mode
+
+  defp validate_mode!(mode) do
+    raise ArgumentError, """
+    invalid :mode option passed to EctoNestedChangeset.delete_at/3
+
+    Expected one of:
+
+        {:action, :replace}
+        {:action, :delete}
+        {:flag, field}
+
+    Got:
+
+        #{inspect(mode)}
+    """
   end
 
   defp nested_update(operation, changeset, field, value) when is_atom(field),

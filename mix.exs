@@ -10,7 +10,7 @@ defmodule EctoNestedChangeset.MixProject do
       version: @version,
       name: "Ecto Nested Changeset",
       description: description(),
-      elixir: "~> 1.8",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls],

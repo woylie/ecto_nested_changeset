@@ -851,6 +851,24 @@ defmodule EctoNestedChangesetTest do
              } = changeset.changes
     end
 
+    test "raises error for an unknown mode" do
+      changeset = change(%Category{id: 1, posts: [%Post{id: 1, title: "one"}]})
+
+      for mode <- [{:field, :delete}, {:action, :remove}, :delete, nil] do
+        assert_raise ArgumentError, ~r/invalid :mode option/, fn ->
+          delete_at(changeset, [:posts, 0], mode: mode)
+        end
+      end
+    end
+
+    test "raises error for an unknown option" do
+      changeset = change(%Category{id: 1, posts: [%Post{id: 1, title: "one"}]})
+
+      assert_raise ArgumentError, ~r/unknown keys \[:modes\]/, fn ->
+        delete_at(changeset, [:posts, 0], modes: {:action, :delete})
+      end
+    end
+
     test "deletes item from an array field" do
       changeset =
         %Category{
