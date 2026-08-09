@@ -907,6 +907,13 @@ defmodule EctoNestedChangesetTest do
       assert field == "two"
     end
 
+    test "accepts an atom as a path" do
+      changeset =
+        change(%Category{id: 1, posts: [%Post{id: 1, title: "first"}]})
+
+      assert get_at(changeset, :posts) == get_at(changeset, [:posts])
+    end
+
     test "doesn't raise error if resource field is not loaded" do
       %Category{id: 1}
       |> change()
