@@ -15,7 +15,16 @@ defmodule EctoNestedChangeset.MixProject do
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
       dialyzer: [
-        plt_file: {:no_warn, ".plts/dialyzer.plt"}
+        plt_add_apps: [:ex_unit, :mix],
+        plt_file: {:no_warn, ".plts/dialyzer.plt"},
+        flags: [
+          :error_handling,
+          :extra_return,
+          :missing_return,
+          :underspecs,
+          :unmatched_returns,
+          :unknown
+        ]
       ],
       source_url: @source_url,
       homepage_url: @source_url,

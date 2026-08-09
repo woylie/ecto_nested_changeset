@@ -32,8 +32,10 @@ defmodule EctoNestedChangeset do
   """
   @spec append_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
-  def append_at(%Changeset{} = changeset, path, value),
-    do: nested_update(:append, changeset, validate_path!(path), value)
+  def append_at(%Changeset{} = changeset, path, value) do
+    path = validate_path!(path)
+    %Changeset{} = nested_update(:append, changeset, path, value)
+  end
 
   @doc """
   Prepends a value to the field referenced by the path.
@@ -56,8 +58,10 @@ defmodule EctoNestedChangeset do
   """
   @spec prepend_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
-  def prepend_at(%Changeset{} = changeset, path, value),
-    do: nested_update(:prepend, changeset, validate_path!(path), value)
+  def prepend_at(%Changeset{} = changeset, path, value) do
+    path = validate_path!(path)
+    %Changeset{} = nested_update(:prepend, changeset, path, value)
+  end
 
   @doc """
   Inserts a value into a field at the given position.
@@ -90,8 +94,10 @@ defmodule EctoNestedChangeset do
   """
   @spec insert_at(Changeset.t(), [atom | non_neg_integer] | atom, any) ::
           Changeset.t()
-  def insert_at(%Changeset{} = changeset, path, value),
-    do: nested_update(:insert, changeset, validate_path!(path), value)
+  def insert_at(%Changeset{} = changeset, path, value) do
+    path = validate_path!(path)
+    %Changeset{} = nested_update(:insert, changeset, path, value)
+  end
 
   @doc """
   Updates the value in the changeset at the given position with the given update
@@ -133,8 +139,11 @@ defmodule EctoNestedChangeset do
           [atom | non_neg_integer] | atom,
           (any -> any)
         ) :: Changeset.t()
-  def update_at(%Changeset{} = changeset, path, func) when is_function(func, 1),
-    do: nested_update(:update, changeset, validate_path!(path), func)
+  def update_at(%Changeset{} = changeset, path, func)
+      when is_function(func, 1) do
+    path = validate_path!(path)
+    %Changeset{} = nested_update(:update, changeset, path, func)
+  end
 
   @doc """
   Deletes the item at the given path.
@@ -208,14 +217,11 @@ defmodule EctoNestedChangeset do
   """
   @spec delete_at(Changeset.t(), [atom | non_neg_integer] | atom, keyword) ::
           Changeset.t()
-  def delete_at(%Changeset{} = changeset, path, opts \\ []),
-    do:
-      nested_update(
-        :delete,
-        changeset,
-        validate_path!(path),
-        mode_from_opts!(opts)
-      )
+  def delete_at(%Changeset{} = changeset, path, opts \\ []) do
+    path = validate_path!(path)
+    mode = mode_from_opts!(opts)
+    %Changeset{} = nested_update(:delete, changeset, path, mode)
+  end
 
   @doc """
   Returns a value from a changeset referenced by the path.
