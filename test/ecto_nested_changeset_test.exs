@@ -1,5 +1,5 @@
 defmodule EctoNestedChangesetTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import Ecto.Changeset
   import EctoNestedChangeset
