@@ -42,7 +42,7 @@ defmodule Nested.MixProject do
       {:heroicons, "0.5.7"},
       {:jason, "== 1.4.5"},
       {:lazy_html, ">= 0.1.0", only: :test},
-      {:phoenix, "== 1.8.9"},
+      {:phoenix, "== 1.8.12"},
       {:phoenix_ecto, "4.7.0"},
       {:phoenix_html, "4.3.0"},
       {:phoenix_live_reload, "1.7.0", only: :dev},
