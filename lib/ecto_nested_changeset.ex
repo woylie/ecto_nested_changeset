@@ -15,6 +15,22 @@ defmodule EctoNestedChangeset do
   instead, since there is nothing to preload yet. `get_at/2` does not raise: it
   returns `nil` for a relation that is not loaded.
 
+  An index past the end of a list is ignored. The functions return the
+  changeset unchanged, and `get_at/2` returns `nil`. Only `insert_at/3` appends
+  the value instead.
+
+  ## Reordering
+
+  To swap two items in a list, use `update_at/3` with a helper function:
+
+      def swap(list, i, j) do
+        list
+        |> List.replace_at(i, Enum.at(list, j))
+        |> List.replace_at(j, Enum.at(list, i))
+      end
+
+      update_at(changeset, [:posts, 0, :tags], &swap(&1, 0, 2))
+
   ## Schemas used in the examples
 
   The examples in this module operate on these schemas.
@@ -202,13 +218,17 @@ defmodule EctoNestedChangeset do
     the action set to `:delete`.
   - `[mode: {:flag, field}]` - Puts `true` as a change for the given field.
 
+  Use `:mode` only for relations, not for array fields.
+
+  An unknown option key or an unknown `:mode` value raises an `ArgumentError`.
+
   An unpersisted struct that the caller put into the parent's `:data` rather
-  than its `:changes` is neither of those cases. It is treated like a persisted
-  struct, and `c:Ecto.Repo.update/2` then raises
-  `Ecto.NoPrimaryKeyValueError`. Removing it from the list instead would not
-  help, since Ecto reconciles the relation against `:data` and tries to delete
-  it there. Add unpersisted items with `append_at/3`, `prepend_at/3` or
-  `insert_at/3`, so that they end up in the changes.
+  than its `:changes` is treated like a persisted struct, and
+  `c:Ecto.Repo.update/2` then raises `Ecto.NoPrimaryKeyValueError`. Removing
+  it from the list instead would not help, since Ecto reconciles the relation
+  against `:data` and tries to delete it there. Add unpersisted items with
+  `append_at/3`, `prepend_at/3` or `insert_at/3`, so that they end up in the
+  changes.
 
   The flag option is useful for explicitly marking items for deletion in form
   parameters. In this case, you would configure a virtual field on the schema
@@ -232,8 +252,6 @@ defmodule EctoNestedChangeset do
           do: Map.put(changeset, :action, :delete),
           else: changeset
       end
-
-  An unknown option key or an unknown `:mode` value raises an `ArgumentError`.
 
   ## Examples
 
