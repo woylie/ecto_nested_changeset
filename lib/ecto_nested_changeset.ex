@@ -509,8 +509,10 @@ defmodule EctoNestedChangeset do
 
   defp nested_get(operation, items, [index | rest])
        when is_list(items) and is_integer(index) and index >= 0 do
-    nested_value = Enum.at(items, index)
-    nested_get(operation, nested_value, rest)
+    case Enum.fetch(items, index) do
+      {:ok, nested_value} -> nested_get(operation, nested_value, rest)
+      :error -> nil
+    end
   end
 
   defp get_change_or_field(%Changeset{} = changeset, field) do
