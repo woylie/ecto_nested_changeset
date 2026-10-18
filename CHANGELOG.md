@@ -8,6 +8,8 @@ and this project adheres to
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-18
+
 ### Fixed
 
 - Return `nil` from `get_at/2` for an out-of-range index in the middle of a
@@ -101,7 +103,8 @@ and this project adheres to
 
 - Initial release.
 
-[Unreleased]: https://github.com/woylie/ecto_nested_changeset/compare/1.1.0...HEAD
+[Unreleased]: https://github.com/woylie/ecto_nested_changeset/compare/1.1.1...HEAD
+[1.1.1]: https://github.com/woylie/ecto_nested_changeset/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/woylie/ecto_nested_changeset/compare/1.0.1...1.1.0
 [1.0.1]: https://github.com/woylie/ecto_nested_changeset/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/woylie/ecto_nested_changeset/compare/0.2.1...1.0.0
