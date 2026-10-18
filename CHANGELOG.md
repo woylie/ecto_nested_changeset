@@ -8,6 +8,11 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Return `nil` from `get_at/2` for an out-of-range index in the middle of a
+  path.
+
 ## [1.1.0] - 2026-08-09
 
 ### Added

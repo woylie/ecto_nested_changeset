@@ -107,6 +107,81 @@ defmodule EctoNestedChangesetTest do
     end
   end
 
+  describe "index past the end of a list" do
+    setup do
+      %{
+        changeset:
+          change(%Category{
+            id: 1,
+            posts: [
+              %Post{
+                id: 1,
+                tags: ["one"],
+                comments: [%Comment{id: 1, body: "one"}]
+              }
+            ]
+          })
+      }
+    end
+
+    test "returns the unchanged changeset from all functions", %{
+      changeset: changeset
+    } do
+      results = [
+        append_at(changeset, [:posts, 5, :comments], %Comment{}),
+        append_at(
+          changeset,
+          [:posts, 0, :comments, 5, :post, :comments],
+          %Comment{}
+        ),
+        prepend_at(changeset, [:posts, 5, :comments], %Comment{}),
+        prepend_at(
+          changeset,
+          [:posts, 0, :comments, 5, :post, :comments],
+          %Comment{}
+        ),
+        insert_at(changeset, [:posts, 5, :tags, 0], "two"),
+        insert_at(changeset, [:posts, 0, :comments, 5, :post, :tags, 0], "two"),
+        update_at(changeset, [:posts, 5], & &1),
+        update_at(changeset, [:posts, 0, :tags, 5], &String.upcase/1),
+        update_at(
+          changeset,
+          [:posts, 0, :comments, 5, :body],
+          &String.upcase/1
+        ),
+        delete_at(changeset, [:posts, 5]),
+        delete_at(changeset, [:posts, 0, :tags, 5]),
+        delete_at(changeset, [:posts, 0, :comments, 5])
+      ]
+
+      for result <- results do
+        assert result == changeset
+      end
+    end
+
+    test "appends the value in insert_at/3 for an index past the end", %{
+      changeset: changeset
+    } do
+      assert [%Post{id: 1}, %Post{title: "two"}] =
+               changeset
+               |> insert_at([:posts, 5], %Post{title: "two"})
+               |> get_at([:posts])
+
+      assert changeset
+             |> insert_at([:posts, 0, :tags, 5], "two")
+             |> get_at([:posts, 0, :tags]) == ["one", "two"]
+    end
+
+    test "returns nil from get_at/2 at any position in the path", %{
+      changeset: changeset
+    } do
+      assert get_at(changeset, [:posts, 5]) == nil
+      assert get_at(changeset, [:posts, 5, :title]) == nil
+      assert get_at(changeset, [:posts, 0, :tags, 5]) == nil
+      assert get_at(changeset, [:posts, 0, :comments, 5, :body]) == nil
+    end
+  end
+
   describe "append_at/3" do
     test "appends item at a root level field without data" do
       changeset =
