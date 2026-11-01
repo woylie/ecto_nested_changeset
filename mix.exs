@@ -57,7 +57,7 @@ defmodule EctoNestedChangeset.MixProject do
     [
       {:castore, "== 1.0.21", only: :test},
       {:credo, "== 1.7.19", only: [:dev, :test], runtime: false},
-      {:dialyxir, "1.4.7", only: [:dev], runtime: false},
+      {:dialyxir, "== 1.4.8", only: [:dev], runtime: false},
       {:ecto, "~> 3.7"},
       {:ecto_sql, "== 3.14.0", only: :test},
       {:ex_doc, "0.40.3", only: :dev, runtime: false},
